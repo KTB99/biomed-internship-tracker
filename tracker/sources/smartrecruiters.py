@@ -22,9 +22,7 @@ def fetch(client: Client, company: Company) -> list[Lead]:
         offset = 0
         term_ids: set[str] = set()
         for _ in range(MAX_PAGES):
-            payload = client.get_json(
-                url, params={"q": term, "limit": PAGE_SIZE, "offset": offset}
-            )
+            payload = client.get_json(url, params={"q": term, "limit": PAGE_SIZE, "offset": offset})
             page = records(payload, "content")
             before = len(term_ids)
             for posting in page:
