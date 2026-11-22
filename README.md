@@ -144,7 +144,7 @@ These companies have no open postings we can read right now. Their own internshi
 
 | Last refresh | Open | Companies hiring | Program pages | Companies read | Failed reads | Closed |
 | --- | ---: | ---: | ---: | ---: | --- | ---: |
-| 2026-11-22 | 43 | 10 | 22 | 30 | none | 0 |
+| 2026-11-22 | 43 | 10 | 22 | 31 | none | 0 |
 
 Closed listings are in [CLOSED.md](CLOSED.md).
 
@@ -163,7 +163,7 @@ Closed listings are in [CLOSED.md](CLOSED.md).
 | [CONMED](https://careers.conmed.com) | phenom | 0 | ok |
 | [CooperCompanies](https://hcjy.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1) | oracle | 0 | ok |
 | [Dexcom](https://careers.dexcom.com) | eightfold | 0 | ok |
-| [Edwards](https://www.edwards.com/careers) | — | 0 | link only |
+| [Edwards](https://www.edwards.com/careers) | algolia | 0 | ok |
 | [GE HealthCare](https://careers.gehealthcare.com) | phenom | 0 | ok |
 | [Globus Medical](https://www.globusmedical.com/about/careers/) | careers\_page | 0 | ok |
 | [Hologic](https://ebwb.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX) | oracle | 0 | ok |
