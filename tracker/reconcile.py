@@ -5,6 +5,10 @@ Rules:
   closed because it went missing reopens. Manually closed listings stay closed.
 - An open listing absent from a successful read of its company gains one miss
   per calendar day. Two misses close it.
+- A listing of the current season whose posting a successful read still
+  returns, but which screening now rejects, is removed from the catalog in that
+  run: no miss, no close. Manually closed listings and listings from other
+  seasons are never removed.
 - Companies whose read failed are left exactly as they were.
 """
 
@@ -28,6 +32,7 @@ class CompanyRun:
     ok: bool
     accepted: list[dict] = field(default_factory=list)
     fetched: int = 0
+    rejected_ids: set[str] = field(default_factory=set)
     error: str | None = None
 
 
@@ -62,11 +67,22 @@ def display_location(locations: list[str]) -> str:
     return shown[:300]
 
 
-def reconcile(existing: list[dict], runs: list[CompanyRun], today: str) -> list[dict]:
+def reconcile(
+    existing: list[dict], runs: list[CompanyRun], today: str, *, season: str
+) -> list[dict]:
     by_id = {row["id"]: dict(row) for row in existing}
     for run in runs:
         if not run.ok:
             continue
+        for listing in list(by_id):
+            row = by_id[listing]
+            if (
+                row["company"] == run.company
+                and row["season"] == season
+                and listing in run.rejected_ids
+                and row["close_reason"] != "manual"
+            ):
+                del by_id[listing]
         seen: set[str] = set()
         for record in run.accepted:
             seen.add(record["id"])

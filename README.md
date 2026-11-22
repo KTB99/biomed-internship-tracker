@@ -9,7 +9,8 @@ only collects links.
 - **Who it's for:** students looking for engineering, software, data, science,
   quality and regulatory internships in medtech.
 - **What's included:** internships and summer co-ops in the US for the season
-  below. Full-time, non-STEM, off-season and PhD-only roles are filtered out.
+  below. Full-time, non-STEM, off-season, PhD-only and SkillBridge roles are
+  filtered out.
 - **What's not:** this list is only as complete as each company's public job
   board. A missing company or role doesn't mean nothing is open. Check the
   company's careers page too.
@@ -199,7 +200,9 @@ company in [`companies.toml`](companies.toml) it:
 2. Screens every posting: it must be an internship or summer co-op, in the US,
    STEM, for the target summer, and not PhD-only.
 3. Updates the catalog. A posting missing from a successful read on two
-   different days is closed. A company whose read fails is left untouched.
+   different days is closed. A current-season posting the read still returns
+   but screening now rejects is removed from the catalog in that run, unless
+   it was closed by hand. A company whose read fails is left untouched.
    Companies with no open postings we can read are listed with a link to their
    own internship program page instead.
 4. Validates the catalog against

@@ -88,6 +88,8 @@ _NOT_A_PLACEMENT = re.compile(
     r"\b(?:intern(?:ship)?|program)s?\s+(?:manager|coordinator|director|specialist|lead)\b",
     re.IGNORECASE,
 )
+# DoD SkillBridge places service members leaving the military; it isn't a student internship.
+_SKILLBRIDGE = re.compile(r"\bskill[- ]?bridge\b", re.IGNORECASE)
 _YEAR = re.compile(r"\b20\d{2}\b")
 _OFF_SEASON = re.compile(
     r"\b(?:fall|autumn|spring|winter|semester)\b|\b(?:6|six|8|eight)[- ]month", re.IGNORECASE
@@ -137,6 +139,8 @@ def _placement_problem(lead: Lead) -> str | None:
         return "title is not an internship or co-op"
     if _NOT_A_PLACEMENT.search(lead.title):
         return "title is a full-time or program-staff role"
+    if _SKILLBRIDGE.search(lead.title):
+        return "title is a SkillBridge placement"
     return None
 
 

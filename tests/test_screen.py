@@ -33,6 +33,16 @@ def reasons(item: Lead) -> tuple[str, ...]:
         ("Toronto, Ontario, Canada", False),
         ("Mexicali, Baja California, Mexico", False),
         ("Galway, Ireland", False),
+        ("Utrecht, UT, NL", False),
+        ("Quebec, QC, CA", False),
+        ("Bogota, DC, CO", False),
+        ("Fellbach, BW, DE", False),
+        ("Pune, MH, IN", False),
+        ("Marlboro, MA, US", True),
+        ("Cleveland, Bolivar, MS", True),
+        ("Juncos, Juncos, PR", True),
+        ("Washington, District of Columbia, DC", True),
+        ("1 Edwards Way, Irvine, CA", True),
         ("", False),
     ],
 )
@@ -61,6 +71,10 @@ def test_accepts_stem_summer_internships(title):
     [
         (lead("Senior Software Engineer"), "title is not an internship or co-op"),
         (lead("Internship Program Coordinator"), "title is a full-time or program-staff role"),
+        (
+            lead("SkillBridge Intern – Medical Imaging Service Engineer, Nationwide Opportunities"),
+            "title is a SkillBridge placement",
+        ),
         (lead("Marketing Intern"), "non-STEM role"),
         (lead("Finance Data Intern"), "non-STEM role"),
         (lead("Summer Intern"), "no STEM evidence in title or department"),
@@ -98,6 +112,16 @@ def test_business_intelligence_is_stem():
 def test_non_us_country_overrides_state_like_code():
     item = lead("Engineering Intern", locations=["Pune, IN"], country="IN")
     assert "country is IN" in reasons(item)
+
+
+def test_foreign_country_code_places_have_no_us_location():
+    item = lead("Engineering Intern", locations=["Utrecht, UT, NL", "Utrecht, Netherlands | N/A"])
+    assert "no US location" in reasons(item)
+
+
+def test_one_us_place_is_enough_beside_a_foreign_country_code_place():
+    item = lead("Engineering Intern", locations=["Utrecht, UT, NL", "Marlboro, MA, US"])
+    assert reasons(item) == ()
 
 
 def test_us_country_field_is_enough():
