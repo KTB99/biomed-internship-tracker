@@ -31,7 +31,9 @@ def test_links_only_allow_http_and_encode_breakers():
 
 def test_block_groups_by_family_newest_first():
     rows = [
-        record("1", title="Firmware Intern", family="Electrical & Firmware", posted_on="2026-10-01"),
+        record(
+            "1", title="Firmware Intern", family="Electrical & Firmware", posted_on="2026-10-01"
+        ),
         record("2", title="FPGA Intern", family="Electrical & Firmware", posted_on="2026-11-01"),
         record("3", title="Old season", season="summer-2026"),
         record("4", title="Closed", status="closed", closed_on="2026-11-01", close_reason="manual"),

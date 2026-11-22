@@ -7,7 +7,15 @@ from urllib.parse import urljoin
 from tracker.config import Company
 from tracker.http import Client
 from tracker.models import Lead
-from tracker.sources._common import SEARCH_TERMS, as_int, dig, mapping, origin, path_segment, records
+from tracker.sources._common import (
+    SEARCH_TERMS,
+    as_int,
+    dig,
+    mapping,
+    origin,
+    path_segment,
+    records,
+)
 from tracker.text import clean, to_iso_date
 
 PAGE_SIZE = 50

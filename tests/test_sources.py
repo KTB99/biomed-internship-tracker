@@ -15,7 +15,9 @@ def test_greenhouse_reads_board_with_content():
                 "location": {"name": "Plymouth, MN"},
                 "first_published": "2026-10-02T09:00:00-05:00",
                 "departments": [{"name": "Research & Development"}],
-                "content": "&lt;p&gt;Design &amp;amp; test.&lt;/p&gt;&lt;script&gt;x()&lt;/script&gt;",
+                "content": (
+                    "&lt;p&gt;Design &amp;amp; test.&lt;/p&gt;&lt;script&gt;x()&lt;/script&gt;"
+                ),
             },
             {"id": 4002, "title": "", "absolute_url": "https://x"},
         ]

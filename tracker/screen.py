@@ -192,9 +192,12 @@ def _degree_problem(lead: Lead) -> str | None:
     if _PHD.search(lead.title) and not _names_other_degree(lead.title):
         return "PhD-only title"
     for sentence in _SENTENCE_BREAK.split(lead.description):
-        if _PHD.search(sentence) and _REQUIRED.search(sentence):
-            if not _names_other_degree(sentence):
-                return "PhD required"
+        if (
+            _PHD.search(sentence)
+            and _REQUIRED.search(sentence)
+            and not _names_other_degree(sentence)
+        ):
+            return "PhD required"
     return None
 
 

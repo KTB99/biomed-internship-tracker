@@ -25,8 +25,13 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
       - run: pip install -e ".[dev]"
+      # Every check runs even if an earlier one failed, so one push shows all problems.
       - run: ruff check .
       - run: ruff format --check .
+        if: ${{ !cancelled() }}
       - run: pytest -q
+        if: ${{ !cancelled() }}
       - run: python -m tracker validate
+        if: ${{ !cancelled() }}
       - run: python -m tracker render --check
+        if: ${{ !cancelled() }}

@@ -55,7 +55,7 @@ def new_record(lead: Lead, verdict: Verdict, *, season: str, today: str) -> dict
 
 def display_location(locations: list[str]) -> str:
     unique = list(dict.fromkeys(place for place in locations if place))
-    ordered = [p for p in unique if is_us_location(p)] + [p for p in unique if not is_us_location(p)]
+    ordered = sorted(unique, key=lambda place: not is_us_location(place))  # stable: US first
     shown = "; ".join(ordered[:MAX_LOCATIONS_SHOWN])
     if len(ordered) > MAX_LOCATIONS_SHOWN:
         shown += f" (+{len(ordered) - MAX_LOCATIONS_SHOWN} more)"
