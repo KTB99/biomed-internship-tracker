@@ -32,6 +32,7 @@ _FOREIGN = re.compile(
     r"israel|poland|brazil|tbilisi)\b",
     re.IGNORECASE,
 )
+_TWO_LETTERS = re.compile(r"[A-Za-z]{2}")
 
 
 def names_us(location: str) -> bool:
@@ -42,11 +43,31 @@ def names_us(location: str) -> bool:
 def is_us_location(location: str) -> bool:
     if not location:
         return False
+    country = _trailing_country_code(location)
+    if country:
+        return country == "US"
     if names_us(location):
         return True
     if _FOREIGN.search(location):
         return False
     return bool(_STATE_CODE.search(location) or _STATE_NAME.search(location))
+
+
+def _trailing_country_code(location: str) -> str | None:
+    """The country code ending a "City, Region, CC" place, if it has one.
+
+    Two-part places ("Pune, IN") are left alone: there the code could be a
+    state or a country, and the lead's country field decides. A trailing US
+    state code is a state ("Cleveland, Bolivar, MS") unless the part before it
+    is itself a two-letter region code ("Quebec, QC, CA").
+    """
+    parts = [part.strip() for part in location.split(",")]
+    if len(parts) < 3 or not _TWO_LETTERS.fullmatch(parts[-1]):
+        return None
+    code = parts[-1].upper()
+    if code in STATES and not _TWO_LETTERS.fullmatch(parts[-2]):
+        return None
+    return code
 
 
 def is_us_country(country: str) -> bool:
