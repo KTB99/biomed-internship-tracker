@@ -5,7 +5,8 @@
 # README. `program` is the company's own internship page, listed in the README
 # whenever the company has no open postings we can read.
 #
-# platform = "link" means no automated reader: only the program page is shown.
+# platform = "link" means no automated reader: only the program page is shown
+# (currently J&J MedTech, whose site refuses automated requests).
 # `search_terms` (optional, in params) replaces the default terms
 # ("intern", "internship", "co-op") on search-based platforms.
 
@@ -88,13 +89,15 @@ careers_url = "https://careers.dexcom.com"
 params = { origin = "https://careers.dexcom.com", domain = "dexcom.com" }
 program = { label = "Summer internship program", url = "https://careers.dexcom.com/careers/internship", location = "San Diego, CA" }
 
-# Edwards' job search runs on Algolia (see tracker/sources/algolia.py). It needs
-# the site's search-only key as a parameter, which hasn't been approved yet.
+# Edwards' job search runs on Algolia. `search_key` is the public, search-only
+# key Edwards' own job-search page sends; it grants read access to job listings
+# and nothing else.
 [[companies]]
 name = "Edwards"
-platform = "link"
+platform = "algolia"
 careers_url = "https://www.edwards.com/careers"
-program = { label = "Internship programs", url = "https://www.edwards.com/careers/university-recruiting/internship-programs", location = "Irvine, CA" }
+params = { app_id = "LTJQZME6D2", search_key = "beb9bc9bce9e8a52bd34aec0c2b4a599", index = "EdwardsCareersJobs", referer = "https://www.edwards.com/careers/jobsearch" }
+program ={ label = "Internship programs", url = "https://www.edwards.com/careers/university-recruiting/internship-programs", location = "Irvine, CA" }
 
 [[companies]]
 name = "GE HealthCare"
