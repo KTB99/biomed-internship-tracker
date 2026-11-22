@@ -4,7 +4,8 @@ Guidance for coding agents working on the Biomedical Internship Tracker.
 
 ## Layout
 
-- `companies.toml`: target season and the companies read on each refresh.
+- `companies.toml`: target season, the companies read on each refresh, and each
+  company's program page (shown when it has no readable open postings).
 - `tracker/sources/`: one module per job-board platform; each exposes
   `fetch(client, company) -> list[Lead]`.
 - `tracker/screen.py`: the eligibility rules (US, internship/summer co-op, STEM,

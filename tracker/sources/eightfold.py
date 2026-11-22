@@ -7,7 +7,15 @@ from urllib.parse import urljoin
 from tracker.config import Company
 from tracker.http import Client
 from tracker.models import Lead
-from tracker.sources._common import SEARCH_TERMS, as_int, dig, mapping, origin, param, records
+from tracker.sources._common import (
+    as_int,
+    dig,
+    mapping,
+    origin,
+    param,
+    records,
+    search_terms,
+)
 from tracker.text import clean, to_iso_date
 
 SEARCH_PATH = "/api/pcsx/search"
@@ -18,7 +26,7 @@ def fetch(client: Client, company: Company) -> list[Lead]:
     base = origin(company)
     domain = param(company, "domain")
     leads: dict[str, Lead] = {}
-    for term in SEARCH_TERMS:
+    for term in search_terms(company):
         start = 0
         term_ids: set[str] = set()
         for _ in range(MAX_PAGES):

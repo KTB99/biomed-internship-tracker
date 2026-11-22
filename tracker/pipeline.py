@@ -50,6 +50,8 @@ class RefreshResult:
 
 def read_company(client: Client, company, settings: Settings, today: str, open_count: int):
     """Return (CompanyRun, rejected-lead log entries) for one company."""
+    if company.link_only:
+        return CompanyRun(company.name, ok=True), []
     try:
         leads = fetch_leads(client, company)
     except (SourceError, ValueError, KeyError, TypeError, AttributeError) as exc:

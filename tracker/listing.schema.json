@@ -33,7 +33,21 @@
     "location": { "type": "string", "maxLength": 300 },
     "url": { "type": "string", "pattern": "^https?://\\S+$", "maxLength": 2000 },
     "platform": {
-      "enum": ["eightfold", "greenhouse", "lever", "phenom", "smartrecruiters"]
+      "enum": [
+        "algolia",
+        "careers_page",
+        "eightfold",
+        "greenhouse",
+        "jobs2web",
+        "kentico",
+        "lever",
+        "oracle",
+        "paradox",
+        "phenom",
+        "pinpoint",
+        "smartrecruiters",
+        "talentbrew"
+      ]
     },
     "external_id": { "type": "string", "maxLength": 200 },
     "family": {

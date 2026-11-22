@@ -8,7 +8,25 @@ from tracker.config import Company
 from tracker.http import SourceError
 
 # Search terms for platforms that need a query rather than returning a whole board.
-SEARCH_TERMS = ("intern", "co-op")
+# Some sites return different results for "intern" and "internship", so both are used.
+SEARCH_TERMS = ("intern", "internship", "co-op")
+
+
+def search_terms(company: Company) -> tuple[str, ...]:
+    """The company's `search_terms` parameter, or the defaults."""
+    custom = company.params.get("search_terms")
+    if custom is None:
+        return SEARCH_TERMS
+    terms = tuple(str(term).strip() for term in custom if str(term).strip())
+    if not terms:
+        raise ValueError(f"{company.name}: search_terms must not be empty")
+    return terms
+
+
+def job_id_from_url(url: str) -> str:
+    """The last all-digit path segment of a job URL, or the URL itself."""
+    digits = [part for part in url.split("?")[0].split("/") if part.isdigit()]
+    return digits[-1] if digits else url
 
 
 def param(company: Company, key: str) -> str:

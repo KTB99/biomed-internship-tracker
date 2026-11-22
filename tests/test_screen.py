@@ -125,6 +125,7 @@ def test_phd_alongside_other_degrees_is_accepted():
         ("Robotics Intern", "Mechanical & Robotics"),
         ("Clinical Research Intern", "Clinical & Regulatory"),
         ("Quality Engineering Intern", "Quality & Manufacturing"),
+        ("Supply Chain Material Management Intern", "Quality & Manufacturing"),
         ("Biomedical Engineering Intern", "R&D & Biomedical"),
         ("Engineering Intern", "Other STEM"),
     ],

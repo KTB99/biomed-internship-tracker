@@ -1,7 +1,13 @@
 # Companies the tracker reads, and the season it targets.
 #
 # Each company names one platform from tracker/sources and that platform's
-# parameters. `careers_url` is the public page linked from the README.
+# parameters. `careers_url` is the company's careers site, linked from the
+# README. `program` is the company's own internship page, listed in the README
+# whenever the company has no open postings we can read.
+#
+# platform = "link" means no automated reader: only the program page is shown.
+# `search_terms` (optional, in params) replaces the default terms
+# ("intern", "internship", "co-op") on search-based platforms.
 
 season = "summer-2027"
 
@@ -10,27 +16,224 @@ name = "Abbott"
 platform = "phenom"
 careers_url = "https://www.jobs.abbott"
 params = { origin = "https://www.jobs.abbott" }
+program = { label = "University internship program", url = "https://www.jobs.abbott/us/en/university-internship-program", location = "Abbott Park, IL" }
+
+[[companies]]
+name = "Alcon"
+platform = "careers_page"
+careers_url = "https://www.alcon.com/careers/"
+params = { page = "https://www.alcon.com/careers/early-careers/" }
+program = { label = "Early careers", url = "https://www.alcon.com/careers/early-careers/", location = "Fort Worth, TX" }
+
+[[companies]]
+name = "Align"
+platform = "pinpoint"
+careers_url = "https://jobs.aligntech.com/careers"
+params = { jobs_url = "https://jobs.aligntech.com/jobs.json" }
+program = { label = "Careers and internships", url = "https://jobs.aligntech.com/careers", location = "Tempe, AZ" }
+
+[[companies]]
+name = "Arthrex"
+platform = "jobs2web"
+careers_url = "https://careers.arthrex.com"
+params = { origin = "https://careers.arthrex.com" }
+program = { label = "Internships", url = "https://careers.arthrex.com/NorthAmerica/content/Arthrex-Internships/?locale=en_US", location = "Naples, FL" }
+
+[[companies]]
+name = "Baxter"
+platform = "talentbrew"
+careers_url = "https://jobs.baxter.com"
+params = { origin = "https://jobs.baxter.com" }
+program = { label = "Internships and co-ops", url = "https://jobs.baxter.com/en/category/intern-jobs/152/83228/1", location = "Deerfield, IL" }
+
+[[companies]]
+name = "BD"
+platform = "talentbrew"
+careers_url = "https://jobs.bd.com"
+params = { origin = "https://jobs.bd.com", results_module = "Section 6 - Search Results List - Content Search" }
+program = { label = "Early talent", url = "https://jobs.bd.com/en/early-talent", location = "Franklin Lakes, NJ" }
+
+[[companies]]
+name = "Biotronik"
+platform = "careers_page"
+careers_url = "https://www.biotronik.com/en-us/careers"
+params = { page = "https://www.biotronik.com/en-us/careers/career-levels/students" }
+program = { label = "Student opportunities", url = "https://www.biotronik.com/en-us/careers/career-levels/students", location = "Lake Oswego, OR" }
+
+[[companies]]
+name = "Boston Scientific"
+platform = "eightfold"
+careers_url = "https://bostonscientific.eightfold.ai/careers"
+params = { origin = "https://bostonscientific.eightfold.ai", domain = "bostonscientific.com" }
+program = { label = "Student opportunities", url = "https://www.bostonscientific.com/en-US/careers/students.html", location = "Marlborough, MA" }
+
+[[companies]]
+name = "CONMED"
+platform = "phenom"
+careers_url = "https://careers.conmed.com"
+params = { origin = "https://careers.conmed.com" }
+program = { label = "Internship program", url = "https://careers.conmed.com/internships", location = "Largo, FL" }
+
+[[companies]]
+name = "CooperCompanies"
+platform = "oracle"
+careers_url = "https://hcjy.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1"
+params = { origin = "https://hcjy.fa.us2.oraclecloud.com", site = "CX_1" }
+program = { label = "Global internship program", url = "https://www.coopercos.com/global-internship-program/", location = "San Ramon, CA" }
 
 [[companies]]
 name = "Dexcom"
 platform = "eightfold"
 careers_url = "https://careers.dexcom.com"
 params = { origin = "https://careers.dexcom.com", domain = "dexcom.com" }
+program = { label = "Summer internship program", url = "https://careers.dexcom.com/careers/internship", location = "San Diego, CA" }
+
+# Edwards' job search runs on Algolia (see tracker/sources/algolia.py). It needs
+# the site's search-only key as a parameter, which hasn't been approved yet.
+[[companies]]
+name = "Edwards"
+platform = "link"
+careers_url = "https://www.edwards.com/careers"
+program = { label = "Internship programs", url = "https://www.edwards.com/careers/university-recruiting/internship-programs", location = "Irvine, CA" }
+
+[[companies]]
+name = "GE HealthCare"
+platform = "phenom"
+careers_url = "https://careers.gehealthcare.com"
+params = { origin = "https://careers.gehealthcare.com" }
+program = { label = "Internships", url = "https://careers.gehealthcare.com/global/en/internship", location = "Chicago, IL" }
+
+[[companies]]
+name = "Globus Medical"
+platform = "careers_page"
+careers_url = "https://www.globusmedical.com/about/careers/"
+params = { page = "https://www.globusmedical.com/about/careers/" }
+program = { label = "Co-op program", url = "https://www.globusmedical.com/about/careers/", location = "Audubon, PA" }
+
+[[companies]]
+name = "Hologic"
+platform = "oracle"
+careers_url = "https://ebwb.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX"
+params = { origin = "https://ebwb.fa.us2.oraclecloud.com", site = "CX" }
+program = { label = "Student opportunities", url = "https://na.careers.hologic.com/en/student-opportunities", location = "Marlborough, MA" }
 
 [[companies]]
 name = "Inspire Medical Systems"
 platform = "greenhouse"
 careers_url = "https://job-boards.greenhouse.io/inspiremedicalsystemsinc"
 params = { board = "inspiremedicalsystemsinc" }
+program = { label = "Internship program", url = "https://www.inspiresleep.com/en-us/careers/internships/", location = "Minneapolis, MN" }
+
+[[companies]]
+name = "Insulet"
+platform = "careers_page"
+careers_url = "https://www.insulet.com/working-at-insulet"
+params = { page = "https://www.insulet.com/working-at-insulet/students-and-early-careers" }
+program = { label = "Students and early careers", url = "https://www.insulet.com/working-at-insulet/students-and-early-careers", location = "Acton, MA" }
+
+[[companies]]
+name = "Integra LifeSciences"
+platform = "kentico"
+careers_url = "https://www.integralife.com/careers/job-search"
+params = { origin = "https://www.integralife.com", page_url = "/careers/job-search" }
+program = { label = "Early talent and student opportunities", url = "https://www.integralife.com/careers/career-areas/early-talent-student-opportunities", location = "Princeton, NJ" }
 
 [[companies]]
 name = "Intuitive"
 platform = "smartrecruiters"
 careers_url = "https://careers.intuitive.com"
 params = { company_id = "Intuitive" }
+program = { label = "Students and university", url = "https://careers.intuitive.com/en/career-opportunities/students-and-university/", location = "Sunnyvale, CA" }
+
+# J&J's careers site refuses automated requests (HTTP 403), so it is link-only.
+[[companies]]
+name = "J&J MedTech"
+platform = "link"
+careers_url = "https://www.careers.jnj.com"
+program = { label = "Early career internships", url = "https://www.careers.jnj.com/en/early-career-programs/internships/", location = "New Brunswick, NJ" }
+
+[[companies]]
+name = "Medtronic"
+platform = "careers_page"
+careers_url = "https://www.medtronic.com/en-us/our-company/careers.html"
+params = { page = "https://www.medtronic.com/en-us/our-company/careers/early-careers.html" }
+program = { label = "Early careers", url = "https://www.medtronic.com/en-us/our-company/careers/early-careers.html", location = "Minneapolis, MN" }
+
+[[companies]]
+name = "Olympus"
+platform = "jobs2web"
+careers_url = "https://careers.olympusamerica.com"
+params = { origin = "https://careers.olympusamerica.com" }
+program = { label = "Current students", url = "https://www.olympusamerica.com/careers/current-students", location = "Center Valley, PA" }
 
 [[companies]]
 name = "Penumbra"
 platform = "lever"
 careers_url = "https://jobs.lever.co/penumbrainc"
 params = { site = "penumbrainc" }
+program = { label = "Open roles", url = "https://jobs.lever.co/penumbrainc", location = "Alameda, CA" }
+
+[[companies]]
+name = "Philips"
+platform = "phenom"
+careers_url = "https://www.careers.philips.com"
+params = { origin = "https://www.careers.philips.com" }
+program = { label = "Internships", url = "https://www.careers.philips.com/student/na/en/internships-apprenticeship", location = "Cambridge, MA" }
+
+[[companies]]
+name = "ResMed"
+platform = "careers_page"
+careers_url = "https://careers.resmed.com"
+params = { page = "https://careers.resmed.com/careers/early-careers/" }
+program = { label = "Early careers", url = "https://careers.resmed.com/careers/early-careers/", location = "San Diego, CA" }
+
+[[companies]]
+name = "Siemens Healthineers"
+platform = "phenom"
+careers_url = "https://careers.siemens-healthineers.com"
+params = { origin = "https://careers.siemens-healthineers.com" }
+program = { label = "Students", url = "https://www.siemens-healthineers.com/en-us/careers/students", location = "Malvern, PA" }
+
+[[companies]]
+name = "Smith+Nephew"
+platform = "careers_page"
+careers_url = "https://www.smith-nephew.com/en-us/careers"
+params = { page = "https://www.smith-nephew.com/en-us/careers" }
+program = { label = "Careers and internships", url = "https://www.smith-nephew.com/en-us/careers", location = "Andover, MA" }
+
+[[companies]]
+name = "STERIS"
+platform = "phenom"
+careers_url = "https://careers.steris.com"
+params = { origin = "https://careers.steris.com" }
+program = { label = "Early careers", url = "https://careers.steris.com/us/en/early-careers", location = "Mentor, OH" }
+
+# Stryker's search ignores paging and returns 10 results per search, so it uses
+# narrower terms. Update the "summer 2027" term when the season changes.
+[[companies]]
+name = "Stryker"
+platform = "paradox"
+careers_url = "https://careers.stryker.com"
+params = { origin = "https://careers.stryker.com", search_terms = ["intern", "internship", "summer 2027", "summer intern", "co-op"] }
+program = { label = "Students and graduates", url = "https://careers.stryker.com/students-and-graduates", location = "Kalamazoo, MI" }
+
+[[companies]]
+name = "Tandem"
+platform = "careers_page"
+careers_url = "https://www.tandemdiabetes.com/about-us/careers"
+params = { page = "https://www.tandemdiabetes.com/about-us/careers/internship-program" }
+program = { label = "Internship program", url = "https://www.tandemdiabetes.com/about-us/careers/internship-program", location = "San Diego, CA" }
+
+[[companies]]
+name = "Teleflex"
+platform = "jobs2web"
+careers_url = "https://careers.teleflex.com"
+params = { origin = "https://careers.teleflex.com" }
+program = { label = "Careers", url = "https://careers.teleflex.com/", location = "Wayne, PA" }
+
+[[companies]]
+name = "Zimmer Biomet"
+platform = "phenom"
+careers_url = "https://careers.zimmerbiomet.com"
+params = { origin = "https://careers.zimmerbiomet.com" }
+program = { label = "Internships and early careers", url = "https://careers.zimmerbiomet.com/us/en/grow-with-us", location = "Warsaw, IN" }

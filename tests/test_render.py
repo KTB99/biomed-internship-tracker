@@ -56,7 +56,7 @@ def test_block_groups_by_family_newest_first():
     assert "Old season" not in block and "| Acme | Closed |" not in block
     assert "| [Acme](https://acme.example) | greenhouse | 2 | ok |" in block
     assert "## Tracker stats" in block
-    assert "| 2026-11-02 | 2 | 1 | 1 | none | 1 |" in block
+    assert "| 2026-11-02 | 2 | 1 | 0 | 1 | none | 1 |" in block
 
 
 def test_empty_block():
@@ -119,4 +119,4 @@ def test_apply_button_refuses_unsafe_urls():
 def test_stats_name_failed_companies():
     status = {"last_run": "2026-11-02", "companies": {"Acme": {"ok": False}, "Beta": {"ok": True}}}
     block = listings_block([], status, settings(company("Acme"), company("Beta")))
-    assert "| 2026-11-02 | 0 | 0 | 2 | Acme | 0 |" in block
+    assert "| 2026-11-02 | 0 | 0 | 0 | 2 | Acme | 0 |" in block
