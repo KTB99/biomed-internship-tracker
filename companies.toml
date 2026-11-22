@@ -1,0 +1,36 @@
+# Companies the tracker reads, and the season it targets.
+#
+# Each company names one platform from tracker/sources and that platform's
+# parameters. `careers_url` is the public page linked from the README.
+
+season = "summer-2027"
+
+[[companies]]
+name = "Abbott"
+platform = "phenom"
+careers_url = "https://www.jobs.abbott"
+params = { origin = "https://www.jobs.abbott" }
+
+[[companies]]
+name = "Dexcom"
+platform = "eightfold"
+careers_url = "https://careers.dexcom.com"
+params = { origin = "https://careers.dexcom.com", domain = "dexcom.com" }
+
+[[companies]]
+name = "Inspire Medical Systems"
+platform = "greenhouse"
+careers_url = "https://job-boards.greenhouse.io/inspiremedicalsystemsinc"
+params = { board = "inspiremedicalsystemsinc" }
+
+[[companies]]
+name = "Intuitive"
+platform = "smartrecruiters"
+careers_url = "https://careers.intuitive.com"
+params = { company_id = "Intuitive" }
+
+[[companies]]
+name = "Penumbra"
+platform = "lever"
+careers_url = "https://jobs.lever.co/penumbrainc"
+params = { site = "penumbrainc" }

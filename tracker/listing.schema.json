@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Internship listing",
+  "description": "One record in data/listings.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "company",
+    "title",
+    "location",
+    "url",
+    "platform",
+    "external_id",
+    "family",
+    "season",
+    "posted_on",
+    "first_seen",
+    "last_seen",
+    "status",
+    "misses",
+    "last_missed",
+    "closed_on",
+    "close_reason"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "company": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "title": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "location": { "type": "string", "maxLength": 300 },
+    "url": { "type": "string", "pattern": "^https?://\\S+$", "maxLength": 2000 },
+    "platform": {
+      "enum": ["eightfold", "greenhouse", "lever", "phenom", "smartrecruiters"]
+    },
+    "external_id": { "type": "string", "maxLength": 200 },
+    "family": {
+      "enum": [
+        "Data & AI",
+        "Software & IT",
+        "Electrical & Firmware",
+        "Mechanical & Robotics",
+        "Clinical & Regulatory",
+        "Quality & Manufacturing",
+        "R&D & Biomedical",
+        "Other STEM"
+      ]
+    },
+    "season": { "type": "string", "pattern": "^summer-[0-9]{4}$" },
+    "posted_on": { "$ref": "#/$defs/optional_date" },
+    "first_seen": { "$ref": "#/$defs/date" },
+    "last_seen": { "$ref": "#/$defs/date" },
+    "status": { "enum": ["open", "closed"] },
+    "misses": { "type": "integer", "minimum": 0 },
+    "last_missed": { "$ref": "#/$defs/optional_date" },
+    "closed_on": { "$ref": "#/$defs/optional_date" },
+    "close_reason": { "enum": ["missing", "manual", null] }
+  },
+  "if": { "properties": { "status": { "const": "closed" } } },
+  "then": {
+    "properties": {
+      "closed_on": { "$ref": "#/$defs/date" },
+      "close_reason": { "enum": ["missing", "manual"] }
+    }
+  },
+  "else": {
+    "properties": {
+      "closed_on": { "type": "null" },
+      "close_reason": { "type": "null" }
+    }
+  },
+  "$defs": {
+    "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "optional_date": {
+      "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }]
+    }
+  }
+}

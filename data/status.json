@@ -1,0 +1,36 @@
+{
+  "last_run": "2026-11-22",
+  "season": "summer-2027",
+  "companies": {
+    "Abbott": {
+      "ok": true,
+      "fetched": 939,
+      "accepted": 4,
+      "error": null
+    },
+    "Dexcom": {
+      "ok": true,
+      "fetched": 3,
+      "accepted": 0,
+      "error": null
+    },
+    "Inspire Medical Systems": {
+      "ok": true,
+      "fetched": 73,
+      "accepted": 0,
+      "error": null
+    },
+    "Intuitive": {
+      "ok": true,
+      "fetched": 325,
+      "accepted": 14,
+      "error": null
+    },
+    "Penumbra": {
+      "ok": true,
+      "fetched": 70,
+      "accepted": 0,
+      "error": null
+    }
+  }
+}

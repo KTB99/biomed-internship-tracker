@@ -1,0 +1,65 @@
+name: Daily refresh
+
+on:
+  schedule:
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: daily-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: pip install -e ".[dev]"
+
+      - name: Refresh listings
+        run: python -m tracker refresh
+
+      # Pull requests opened with GITHUB_TOKEN do not trigger other workflows,
+      # so the same checks CI runs are run here before anything is merged.
+      - name: Check
+        run: |
+          ruff check .
+          pytest -q
+          python -m tracker validate
+          python -m tracker render --check
+
+      - name: Open and merge pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUTOMERGE: ${{ vars.REFRESH_AUTOMERGE }}
+        run: |
+          if git diff --quiet -- data README.md CLOSED.md; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          day="$(date -u +%Y-%m-%d)"
+          branch="refresh/${day}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "${branch}"
+          git add data README.md CLOSED.md
+          git commit -m "data: daily refresh ${day}"
+          git push --force origin "${branch}"
+          if ! gh pr view "${branch}" >/dev/null 2>&1; then
+            gh pr create --base main --head "${branch}" \
+              --title "data: daily refresh ${day}" \
+              --body "Automated listing refresh. Checks ran in the workflow before this PR was opened."
+          fi
+          if [ "${AUTOMERGE}" != "false" ]; then
+            gh pr merge "${branch}" --squash --delete-branch
+          fi
