@@ -51,7 +51,7 @@ FAMILY_RULES: tuple[tuple[str, re.Pattern], ...] = (
         "Quality & Manufacturing",
         re.compile(
             r"quality|manufactur|process (?:engineer|development)|operations engineer|"
-            r"reliability|supplier|validation|sterili",
+            r"reliability|supplier|supply chain|validation|sterili",
             re.IGNORECASE,
         ),
     ),

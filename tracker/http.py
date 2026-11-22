@@ -42,6 +42,19 @@ class Client:
     def post_json(self, url: str, body: dict, *, headers: dict | None = None):
         return self._json("POST", url, json=body, headers=headers)
 
+    def get_text(self, url: str, *, params: dict | None = None, headers: dict | None = None) -> str:
+        """Fetch an HTML page. The body is untrusted and only ever parsed, never rendered."""
+        merged = {"Accept": "text/html,application/xhtml+xml;q=0.9"}
+        merged.update(headers or {})
+        response = self._send("GET", url, params=params, headers=merged)
+        if len(response.content) > MAX_RESPONSE_BYTES:
+            raise SourceError(f"GET {url}: response too large")
+        # requests guesses ISO-8859-1 for HTML without a charset; these sites are UTF-8.
+        encoding = getattr(response, "encoding", None) or "utf-8"
+        if encoding.lower() in ("iso-8859-1", "latin-1"):
+            encoding = "utf-8"
+        return response.content.decode(encoding, errors="replace")
+
     def _json(self, method: str, url: str, **kwargs):
         response = self._send(method, url, **kwargs)
         if len(response.content) > MAX_RESPONSE_BYTES:

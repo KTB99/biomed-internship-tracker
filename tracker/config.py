@@ -12,12 +12,30 @@ REGISTRY_PATH = ROOT / "companies.toml"
 SEASON_PATTERN = re.compile(r"^summer-(\d{4})$")
 
 
+# A company with this platform has no automated reader; only its program page is shown.
+LINK_ONLY = "link"
+
+
+@dataclass(frozen=True)
+class Program:
+    """A company's own internship page, shown when it has no open postings we can read."""
+
+    label: str
+    url: str
+    location: str
+
+
 @dataclass(frozen=True)
 class Company:
     name: str
     platform: str
     careers_url: str
     params: dict = field(default_factory=dict)
+    program: Program | None = None
+
+    @property
+    def link_only(self) -> bool:
+        return self.platform == LINK_ONLY
 
 
 @dataclass(frozen=True)
@@ -55,15 +73,28 @@ def load_settings(path: Path = REGISTRY_PATH) -> Settings:
             platform=str(entry["platform"]).strip(),
             careers_url=str(entry["careers_url"]).strip(),
             params=dict(entry.get("params", {})),
+            program=_program(entry),
         )
         if not company.name:
             raise ValueError("company name must not be empty")
         if company.name.lower() in seen:
             raise ValueError(f"company listed twice: {company.name}")
-        if company.platform not in PLATFORMS:
+        if company.platform not in PLATFORMS and not company.link_only:
             raise ValueError(f"{company.name}: unknown platform {company.platform!r}")
-        if not company.careers_url.startswith("https://"):
-            raise ValueError(f"{company.name}: careers_url must be https")
+        urls = [company.careers_url] + ([company.program.url] if company.program else [])
+        if not all(url.startswith("https://") for url in urls):
+            raise ValueError(f"{company.name}: careers_url and program url must be https")
         seen.add(company.name.lower())
         companies.append(company)
     return Settings(season=season, companies=tuple(companies))
+
+
+def _program(entry: dict) -> Program | None:
+    raw = entry.get("program")
+    if raw is None:
+        return None
+    return Program(
+        label=str(raw["label"]).strip(),
+        url=str(raw["url"]).strip(),
+        location=str(raw.get("location", "")).strip(),
+    )

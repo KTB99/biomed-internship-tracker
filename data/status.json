@@ -8,9 +8,87 @@
       "accepted": 4,
       "error": null
     },
+    "Alcon": {
+      "ok": true,
+      "fetched": 0,
+      "accepted": 0,
+      "error": null
+    },
+    "Align": {
+      "ok": true,
+      "fetched": 202,
+      "accepted": 0,
+      "error": null
+    },
+    "Arthrex": {
+      "ok": true,
+      "fetched": 189,
+      "accepted": 1,
+      "error": null
+    },
+    "Baxter": {
+      "ok": true,
+      "fetched": 46,
+      "accepted": 0,
+      "error": null
+    },
+    "BD": {
+      "ok": true,
+      "fetched": 55,
+      "accepted": 2,
+      "error": null
+    },
+    "Biotronik": {
+      "ok": true,
+      "fetched": 0,
+      "accepted": 0,
+      "error": null
+    },
+    "Boston Scientific": {
+      "ok": true,
+      "fetched": 52,
+      "accepted": 4,
+      "error": null
+    },
+    "CONMED": {
+      "ok": true,
+      "fetched": 7,
+      "accepted": 0,
+      "error": null
+    },
+    "CooperCompanies": {
+      "ok": true,
+      "fetched": 120,
+      "accepted": 0,
+      "error": null
+    },
     "Dexcom": {
       "ok": true,
       "fetched": 3,
+      "accepted": 0,
+      "error": null
+    },
+    "Edwards": {
+      "ok": true,
+      "fetched": 0,
+      "accepted": 0,
+      "error": null
+    },
+    "GE HealthCare": {
+      "ok": true,
+      "fetched": 121,
+      "accepted": 0,
+      "error": null
+    },
+    "Globus Medical": {
+      "ok": true,
+      "fetched": 0,
+      "accepted": 0,
+      "error": null
+    },
+    "Hologic": {
+      "ok": true,
+      "fetched": 119,
       "accepted": 0,
       "error": null
     },
@@ -20,15 +98,99 @@
       "accepted": 0,
       "error": null
     },
+    "Insulet": {
+      "ok": true,
+      "fetched": 0,
+      "accepted": 0,
+      "error": null
+    },
+    "Integra LifeSciences": {
+      "ok": true,
+      "fetched": 1,
+      "accepted": 0,
+      "error": null
+    },
     "Intuitive": {
       "ok": true,
       "fetched": 325,
       "accepted": 14,
       "error": null
     },
+    "J&J MedTech": {
+      "ok": true,
+      "fetched": 0,
+      "accepted": 0,
+      "error": null
+    },
+    "Medtronic": {
+      "ok": true,
+      "fetched": 0,
+      "accepted": 0,
+      "error": null
+    },
+    "Olympus": {
+      "ok": true,
+      "fetched": 67,
+      "accepted": 0,
+      "error": null
+    },
     "Penumbra": {
       "ok": true,
       "fetched": 70,
+      "accepted": 0,
+      "error": null
+    },
+    "Philips": {
+      "ok": true,
+      "fetched": 78,
+      "accepted": 2,
+      "error": null
+    },
+    "ResMed": {
+      "ok": true,
+      "fetched": 0,
+      "accepted": 0,
+      "error": null
+    },
+    "Siemens Healthineers": {
+      "ok": true,
+      "fetched": 130,
+      "accepted": 4,
+      "error": null
+    },
+    "Smith+Nephew": {
+      "ok": true,
+      "fetched": 0,
+      "accepted": 0,
+      "error": null
+    },
+    "STERIS": {
+      "ok": true,
+      "fetched": 26,
+      "accepted": 5,
+      "error": null
+    },
+    "Stryker": {
+      "ok": true,
+      "fetched": 17,
+      "accepted": 6,
+      "error": null
+    },
+    "Tandem": {
+      "ok": true,
+      "fetched": 0,
+      "accepted": 0,
+      "error": null
+    },
+    "Teleflex": {
+      "ok": true,
+      "fetched": 93,
+      "accepted": 1,
+      "error": null
+    },
+    "Zimmer Biomet": {
+      "ok": true,
+      "fetched": 32,
       "accepted": 0,
       "error": null
     }

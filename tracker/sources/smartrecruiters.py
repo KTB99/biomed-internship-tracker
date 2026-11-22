@@ -5,7 +5,14 @@ from __future__ import annotations
 from tracker.config import Company
 from tracker.http import Client
 from tracker.models import Lead
-from tracker.sources._common import SEARCH_TERMS, as_int, mapping, param, path_segment, records
+from tracker.sources._common import (
+    as_int,
+    mapping,
+    param,
+    path_segment,
+    records,
+    search_terms,
+)
 from tracker.text import clean, to_iso_date
 
 POSTINGS_URL = "https://api.smartrecruiters.com/v1/companies/{company_id}/postings"
@@ -18,7 +25,7 @@ def fetch(client: Client, company: Company) -> list[Lead]:
     company_id = path_segment(param(company, "company_id"))
     url = POSTINGS_URL.format(company_id=company_id)
     leads: dict[str, Lead] = {}
-    for term in SEARCH_TERMS:
+    for term in search_terms(company):
         offset = 0
         term_ids: set[str] = set()
         for _ in range(MAX_PAGES):

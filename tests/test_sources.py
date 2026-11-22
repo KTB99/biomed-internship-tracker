@@ -94,7 +94,7 @@ def test_smartrecruiters_pages_and_dedupes_across_terms():
     client, session = fake_client(handler)
     leads = fetch_leads(client, company(platform="smartrecruiters", company_id="Acme"))
     assert sorted(lead.external_id for lead in leads) == ["1", "2", "3"]
-    assert len(session.calls) == 3
+    assert len(session.calls) == 4  # two pages for "intern", one each for the other terms
     lead = next(lead for lead in leads if lead.external_id == "1")
     assert lead.url == "https://jobs.smartrecruiters.com/Acme/1"
     assert lead.locations == ["Sunnyvale, CA, us"]
@@ -159,7 +159,7 @@ def test_phenom_posts_search_and_stops_when_nothing_new():
     )
     leads = fetch_leads(client, company(platform="phenom", origin="https://jobs.acme.example"))
     assert [lead.external_id for lead in leads] == ["R-9"]
-    assert len(session.calls) == 4  # two pages for each of the two search terms
+    assert len(session.calls) == 6  # two pages for each of the three search terms
     method, url, kwargs = session.calls[0]
     assert (method, url) == ("POST", "https://jobs.acme.example/widgets")
     assert kwargs["json"]["keywords"] == "intern"
@@ -172,5 +172,7 @@ def test_missing_parameter_is_a_clear_error():
         fetch_leads(client, company(platform="greenhouse"))
 
 
-def test_every_platform_is_registered():
-    assert set(PLATFORMS) == {"eightfold", "greenhouse", "lever", "phenom", "smartrecruiters"}
+def test_every_platform_is_registered_and_in_the_schema():
+    from tracker.catalog import SCHEMA
+
+    assert set(PLATFORMS) == set(SCHEMA["properties"]["platform"]["enum"])
