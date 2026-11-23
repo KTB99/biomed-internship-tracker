@@ -101,3 +101,63 @@ def test_schema_rejects_inconsistent_closed_rows():
     bad = record(status="closed")
     assert catalog.problems([bad])
     assert catalog.problems([record(), record()]) == [f"{record()['id']}: duplicate id"]
+
+
+def shown_location(*places):
+    lead = Lead(
+        company="Acme",
+        platform="phenom",
+        external_id="1",
+        title="Engineering Intern",
+        url="https://acme.example/jobs/1",
+        locations=list(places),
+    )
+    return new_record(lead, Verdict(True, "Other STEM"), season=SEASON, today="2026-11-01")[
+        "location"
+    ]
+
+
+@pytest.mark.parametrize(
+    "places, expected",
+    [
+        (
+            ["New Kensington, Pennsylvania, United States, Pennsylvania, United States of America"],
+            "New Kensington, Pennsylvania, United States",
+        ),
+        (
+            ["San Diego, California, United States, California, United States of America"],
+            "San Diego, California, United States",
+        ),
+        (
+            ["Marlborough US-MA, United States | N/A", "Marlboro, MA, US"],
+            "Marlborough US-MA, United States; Marlboro, MA, United States",
+        ),
+        (
+            ["Maple Grove US-MN, United States | N/A", "Maple Grove, MN, US"],
+            "Maple Grove US-MN, United States; Maple Grove, MN, United States",
+        ),
+        (["United States | N/A", "US"], "United States"),
+        (
+            ["Utrecht, UT, NL", "Utrecht, Netherlands | N/A"],
+            "Utrecht, UT, NL; Utrecht, Netherlands",
+        ),
+        (["  Bldg 4 / Lab 2 - Remote (Hybrid)  "], "Bldg 4 / Lab 2 - Remote (Hybrid)"),
+        (["N/A"], ""),
+    ],
+)
+def test_displayed_location_names_each_place_once(places, expected):
+    assert shown_location(*places) == expected
+
+
+def test_more_count_is_of_distinct_places_after_tidying():
+    places = [
+        "Galway, Ireland",
+        "Irvine, CA, USA",
+        "Irvine, CA, United States",
+        "Austin, TX, US",
+        "Boston, MA",
+        "Remote | N/A",
+    ]
+    assert shown_location(*places) == (
+        "Irvine, CA, United States; Austin, TX, United States; Boston, MA (+2 more)"
+    )

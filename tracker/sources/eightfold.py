@@ -56,15 +56,20 @@ def _lead(company: Company, base: str, position: dict) -> Lead | None:
     url = urljoin(base + "/", path)
     if not url.startswith(base + "/"):
         url = f"{base}/careers/job/{position_id}"
-    locations = [clean(item) for item in position.get("locations") or []]
-    locations += [clean(item) for item in position.get("standardizedLocations") or []]
+    # `standardizedLocations` repeats `locations` in a noisier format, so it is
+    # only a fallback.
+    locations = _places(position, "locations") or _places(position, "standardizedLocations")
     return Lead(
         company=company.name,
         platform="eightfold",
         external_id=clean(position.get("atsJobId")) or position_id,
         title=title,
         url=url,
-        locations=[item for item in locations if item],
+        locations=locations,
         posted_on=to_iso_date(position.get("postedTs")),
         department=clean(position.get("department")),
     )
+
+
+def _places(position: dict, key: str) -> list[str]:
+    return [item for item in map(clean, position.get(key) or []) if item]

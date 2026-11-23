@@ -1,4 +1,4 @@
-"""Decide whether a free-text job location is in the United States."""
+"""Read free-text job locations: whether a place is in the United States, and its display text."""
 
 from __future__ import annotations
 
@@ -72,3 +72,23 @@ def _trailing_country_code(location: str) -> str | None:
 
 def is_us_country(country: str) -> bool:
     return country.strip().upper() in {"US", "USA", "UNITED STATES", "UNITED STATES OF AMERICA"}
+
+
+_PLACE_PARTS = re.compile(r"[,|]")
+
+
+def tidy_place(place: str) -> str:
+    """One place's text for display: each component once, without board placeholders."""
+    parts: list[str] = []
+    seen: set[str] = set()
+    for part in _PLACE_PARTS.split(place):
+        part = part.strip()
+        if not part or part.upper() == "N/A":
+            continue
+        if is_us_country(part):
+            part = "United States"
+        if part.casefold() in seen:
+            continue
+        seen.add(part.casefold())
+        parts.append(part)
+    return ", ".join(parts)

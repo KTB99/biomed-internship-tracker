@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 
 from tracker.ids import listing_id
 from tracker.models import Lead
-from tracker.places import is_us_location
+from tracker.places import is_us_location, tidy_place
 from tracker.screen import Verdict
 
 MISSES_TO_CLOSE = 2
@@ -59,7 +59,8 @@ def new_record(lead: Lead, verdict: Verdict, *, season: str, today: str) -> dict
 
 
 def display_location(locations: list[str]) -> str:
-    unique = list(dict.fromkeys(place for place in locations if place))
+    tidied = (tidy_place(place) for place in locations)
+    unique = list(dict.fromkeys(place for place in tidied if place))
     ordered = sorted(unique, key=lambda place: not is_us_location(place))  # stable: US first
     shown = "; ".join(ordered[:MAX_LOCATIONS_SHOWN])
     if len(ordered) > MAX_LOCATIONS_SHOWN:
