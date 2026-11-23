@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "17 11 * * *"
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run: read every company and report, write nothing, open no pull request"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -18,33 +23,83 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # Only main may publish. A real refresh dispatched on any other ref would
+      # build data with unmerged code, so it stops here before doing anything.
+      # The schedule always runs on main, and inputs.dry_run is empty there.
+      - name: Refuse to publish from a ref other than main
+        if: ${{ !inputs.dry_run && github.ref != 'refs/heads/main' }}
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          message="A real refresh only runs on main, not ${REF}. Nothing was refreshed and no pull request was opened. Dispatch with dry_run to test this ref."
+          echo "::error::${message}"
+          echo "${message}" >> "${GITHUB_STEP_SUMMARY}"
+          exit 1
+
+      # A real run checks out main's tip rather than the triggering commit, so
+      # "Re-run jobs" refreshes from current main instead of a stale github.sha.
+      # A dry run keeps the dispatched ref, which is the branch under test.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ !inputs.dry_run && 'main' || '' }}
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           cache: pip
           cache-dependency-path: pyproject.toml
       - run: pip install -e ".[dev]"
 
+      # Both refresh steps echo text from job boards to the log, so workflow
+      # commands are paused around them and a posting can't inject "::" commands.
+      - name: Refresh listings (dry run)
+        if: ${{ inputs.dry_run }}
+        run: |
+          set -o pipefail
+          out="${RUNNER_TEMP}/refresh.txt"
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::${token}"
+          status=0
+          python -m tracker refresh --dry-run 2>&1 | tee "${out}" || status=$?
+          echo "::${token}::"
+          # HTML-escaped inside <pre> so text from job boards can't alter the summary.
+          {
+            echo "### Dry run on \`${GITHUB_REF_NAME}\` (exit ${status})"
+            echo
+            echo "<pre>"
+            sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' "${out}"
+            echo "</pre>"
+          } >> "${GITHUB_STEP_SUMMARY}"
+          exit "${status}"
+
       - name: Refresh listings
-        run: python -m tracker refresh
+        if: ${{ !inputs.dry_run }}
+        run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::${token}"
+          status=0
+          python -m tracker refresh || status=$?
+          echo "::${token}::"
+          exit "${status}"
 
       # Pull requests opened with GITHUB_TOKEN do not trigger other workflows,
       # so the same checks CI runs are run here before anything is merged.
       - name: Check
+        if: ${{ !inputs.dry_run }}
         run: |
           ruff check .
+          ruff format --check .
           pytest -q
           python -m tracker validate
           python -m tracker render --check
 
       - name: Open and merge pull request
+        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
           AUTOMERGE: ${{ vars.REFRESH_AUTOMERGE }}
         run: |
           if git diff --quiet -- data README.md CLOSED.md; then
-            echo "Nothing changed."
+            echo "Nothing changed." | tee -a "${GITHUB_STEP_SUMMARY}"
             exit 0
           fi
           day="$(date -u +%Y-%m-%d)"
@@ -55,11 +110,21 @@ jobs:
           git add data README.md CLOSED.md
           git commit -m "data: daily refresh ${day}"
           git push --force origin "${branch}"
-          if ! gh pr view "${branch}" >/dev/null 2>&1; then
-            gh pr create --base main --head "${branch}" \
+          # Reuse only an open pull request from this repository's own branch: a
+          # merged or closed one from an earlier run today is ignored, and a
+          # fork's branch with the same name is never picked up.
+          pr_url="$(gh pr list --head "${branch}" --base main --state open \
+            --json url,isCrossRepository \
+            --jq '[.[] | select(.isCrossRepository | not)][0].url // empty')"
+          if [ -z "${pr_url}" ]; then
+            pr_url="$(gh pr create --base main --head "${branch}" \
               --title "data: daily refresh ${day}" \
-              --body "Automated listing refresh. Checks ran in the workflow before this PR was opened."
+              --body "Automated listing refresh. Checks ran in the workflow before this PR was opened.")"
           fi
-          if [ "${AUTOMERGE}" != "false" ]; then
-            gh pr merge "${branch}" --squash --delete-branch
+          echo "Pull request: ${pr_url}" | tee -a "${GITHUB_STEP_SUMMARY}"
+          if [ "${AUTOMERGE}" = "false" ]; then
+            echo "REFRESH_AUTOMERGE is false; leaving the pull request open for review." \
+              | tee -a "${GITHUB_STEP_SUMMARY}"
+          else
+            gh pr merge "${pr_url}" --squash --delete-branch
           fi

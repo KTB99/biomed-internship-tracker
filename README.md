@@ -209,8 +209,24 @@ company in [`companies.toml`](companies.toml) it:
    [`tracker/listing.schema.json`](tracker/listing.schema.json) and regenerates
    this README and `CLOSED.md`.
 
-The run commits to a branch, opens a pull request and merges it once its checks
-pass.
+The run then runs the same checks as CI, commits to a `refresh/<date>` branch,
+opens a pull request and squash-merges it. A rerun on the same day force-pushes
+that branch and reuses the day's pull request if it is still open, or opens a
+new one otherwise. Set the repository variable `REFRESH_AUTOMERGE` to `false` to
+leave the pull request open for review instead of merging it.
+
+The workflow can also be dispatched by hand from the Actions tab (**Daily
+refresh** → **Run workflow**):
+
+- With **dry run** ticked, it runs `python -m tracker refresh --dry-run` and
+  puts the per-company `[ok]` / `[failed]` lines in the job summary. It writes
+  nothing, skips the checks and opens no pull request. Pick a feature branch in
+  **Use workflow from** to try that branch's readers and `companies.toml` on
+  GitHub's runners before merging.
+- Without it, the run is a real refresh, the same as the scheduled one. A real
+  refresh only runs on `main`: dispatched on any other branch it fails at its
+  first step, before reading anything, so data built from unmerged code never
+  reaches a pull request.
 
 ## Development
 
