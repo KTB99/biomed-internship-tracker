@@ -82,7 +82,7 @@ def test_refresh_tidies_an_existing_listings_location(tmp_path):
 
     refresh(settings(GOOD), client, files, today="2026-11-02")
     (row,) = json.loads(files.listings.read_text())
-    assert row["location"] == "New Kensington, PA"
+    assert row["location"] == "New Kensington, PA, US"
     assert row["first_seen"] == "2026-11-01"
     assert messy not in files.readme.read_text()
 

@@ -51,8 +51,8 @@ def test_block_groups_by_family_newest_first():
     assert "| Company | Role | Location | Apply | Age |" in block
     assert block.index("FPGA Intern") < block.index("Firmware Intern")
     button = f"[![Apply]({APPLY_BUTTON})](https://acme.example/jobs/2)"
-    assert f"| Acme | FPGA Intern | Irvine, CA | {button} | 1d |" in block
-    assert "| Acme | Firmware Intern | Irvine, CA |" in block and "| 4w |" in block
+    assert f"| Acme | FPGA Intern | Irvine, CA, US | {button} | 1d |" in block
+    assert "| Acme | Firmware Intern | Irvine, CA, US |" in block and "| 4w |" in block
     assert "Old season" not in block and "| Acme | Closed |" not in block
     assert "| [Acme](https://acme.example) | greenhouse | 2 | ok |" in block
     assert "## Tracker stats" in block
@@ -111,7 +111,7 @@ def test_submitted_rows_are_escaped_in_the_readme():
     assert "&lt;img src=x onerror=alert\\(1\\)&gt;" in line
     target = "https://acme.example/jobs/1?a=1%29[x]%28javascript:alert%281%29%29"
     assert f"| [![Apply]({APPLY_BUTTON})]({target}) |" in line
-    assert "| Acme | Quality Engineering Intern | Minneapolis, MN | — |" in block
+    assert "| Acme | Quality Engineering Intern | Minneapolis, MN, US | — |" in block
     assert "](javascript:" not in block
 
 

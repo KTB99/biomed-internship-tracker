@@ -74,31 +74,62 @@ def is_us_country(country: str) -> bool:
     return country.strip().upper() in {"US", "USA", "UNITED STATES", "UNITED STATES OF AMERICA"}
 
 
+US = "US"
+MAX_PLACES_SHOWN = 3
+
 _PLACE_PARTS = re.compile(r"[,|]")
-_ZIP = re.compile(r"\d{5}(?:-\d{4})?")
-_STATE_THEN_ZIP = re.compile(r"(?P<state>[A-Z]{2})\s+\d{5}(?:-\d{4})?")  # "CA 94536"
+_ZIP = re.compile(r"\b\d{5}(?:-\d{4})?\b")  # "CA 94536", "34108", "02110-1234"
 _CITY_THEN_STATE = re.compile(r"(?P<city>.+?)\s+US-(?P<state>[A-Z]{2})")  # "Maple Grove US-MN"
 _STATE_CODES_BY_NAME = {name.casefold(): code for code, name in STATES.items()}
+_MORE = re.compile(r"\s*\(\+(?P<count>\d+) more\)$")
+_OUGH = re.compile(r"ough\b")  # "Marlborough" and "Marlboro" are one town
 
 
 def tidy_place(place: str) -> str:
-    """One place's text for display, each component once and without board placeholders.
+    """One place's text for display: each component once, no ZIP codes or board placeholders.
 
-    A US place with a state reads "City, ST" ("Irvine, CA 92602, United States"
-    becomes "Irvine, CA"); one that names only its state reads as the state's
-    full name. Other places keep their components as given.
+    A US place with a state reads "City, ST, US" ("Irvine, CA 92602"
+    becomes "Irvine, CA, US"); one that names only its state reads
+    "ST, US", and one that names only the country "US".
+    Other places keep their components as given.
     """
-    parts = [part.strip() for part in _PLACE_PARTS.split(place)]
+    parts = [" ".join(_ZIP.sub(" ", part).split()) for part in _PLACE_PARTS.split(place)]
     parts = [part for part in parts if part and part.upper() != "N/A"]
     if is_us_location(place):
         us_place = _us_place(parts)
         if us_place is not None:
             return us_place
-    return ", ".join(_unique("United States" if is_us_country(part) else part for part in parts))
+    return ", ".join(_unique(US if is_us_country(part) else part for part in parts))
+
+
+def display_location(places: list[str], *, hidden: int = 0) -> str:
+    """A listing's location text: its distinct places, US first, at most
+    `MAX_PLACES_SHOWN` of them, then how many more there are. `hidden` counts
+    places already left out of the text these came from."""
+    tidied = _unique(place for place in (tidy_place(place) for place in places) if place)
+    tidied = _drop_same_places(tidied)
+    ordered = sorted(tidied, key=lambda place: not is_us_location(place))  # stable: US first
+    shown = "; ".join(ordered[:MAX_PLACES_SHOWN])
+    more = max(len(ordered) - MAX_PLACES_SHOWN, 0) + hidden
+    if more:
+        shown += f" (+{more} more)"
+    return shown[:300]
+
+
+def tidy_location(text: str) -> str:
+    """Stored location text, as `display_location` would write it today.
+
+    Rows keep the text written when their posting was last read, so this
+    brings text written by older rules up to date without reading the board.
+    """
+    more = _MORE.search(text)
+    hidden = int(more["count"]) if more else 0
+    places = text[: more.start()] if more else text
+    return display_location(places.split(";"), hidden=hidden)
 
 
 def _us_place(parts: list[str]) -> str | None:
-    """A US place as "City, ST", or None when it names no state.
+    """A US place as "City, ST, US", or None when it names no state.
 
     The last component that is a state is the place's state. Earlier copies of
     that state are dropped, except a leading full name before a state code,
@@ -106,16 +137,14 @@ def _us_place(parts: list[str]) -> str | None:
     """
     pieces: list[str] = []
     for part in parts:
-        if is_us_country(part) or _ZIP.fullmatch(part):
+        if is_us_country(part):
             continue
         if match := _CITY_THEN_STATE.fullmatch(part):
             pieces += [match["city"], match["state"]]
-        elif match := _STATE_THEN_ZIP.fullmatch(part):
-            pieces.append(match["state"])
         else:
             pieces.append(part)
     if not pieces:
-        return "United States"
+        return US
     states = [index for index, piece in enumerate(pieces) if _state_code(piece)]
     if not states:
         return None
@@ -127,8 +156,23 @@ def _us_place(parts: list[str]) -> str | None:
         for index, piece in enumerate(pieces)
         if index != last and (_state_code(piece) != code or (index == 0 and named_city))
     ]
-    rest = _unique(rest)
-    return ", ".join(rest + [code]) if rest else STATES[code]
+    return ", ".join([*_unique(rest), code, US])
+
+
+def _drop_same_places(places: list[str]) -> list[str]:
+    """Places without repeats of one another: a second spelling of the same
+    town ("Marlboro, MA" after "Marlborough, MA"), or a place that only
+    restates the end of a more specific one ("US" beside
+    "Boston, MA, US")."""
+    keys = [_OUGH.sub("o", place.casefold()) for place in places]
+    kept = []
+    for index, (place, key) in enumerate(zip(places, keys, strict=True)):
+        if key in keys[:index]:
+            continue
+        if any(other.endswith(", " + key) for other in keys):
+            continue
+        kept.append(place)
+    return kept
 
 
 def _state_code(piece: str) -> str | None:

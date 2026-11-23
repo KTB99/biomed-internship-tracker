@@ -3,6 +3,7 @@ import pytest
 from tracker import catalog
 from tracker.ids import listing_id
 from tracker.models import Lead
+from tracker.places import tidy_location
 from tracker.reconcile import (
     CompanyRun,
     apply_url_key,
@@ -108,7 +109,7 @@ def test_close_unknown_id():
 
 def test_display_location_puts_us_first_and_truncates():
     places = ["Galway, Ireland", "Irvine, CA", "Irvine, CA", "Austin, TX", "Boston, MA", "Remote"]
-    assert display_location(places) == "Irvine, CA; Austin, TX; Boston, MA (+2 more)"
+    assert display_location(places) == ("Irvine, CA, US; Austin, TX, US; Boston, MA, US (+2 more)")
 
 
 def test_schema_rejects_inconsistent_closed_rows():
@@ -136,35 +137,41 @@ def shown_location(*places):
     [
         (
             ["New Kensington, Pennsylvania, United States, Pennsylvania, United States of America"],
-            "New Kensington, PA",
+            "New Kensington, PA, US",
         ),
         (
             ["San Diego, California, United States, California, United States of America"],
-            "San Diego, CA",
+            "San Diego, CA, US",
         ),
         (
             ["Marlborough US-MA, United States | N/A", "Marlboro, MA, US"],
-            "Marlborough, MA; Marlboro, MA",
+            "Marlborough, MA, US",
         ),
-        (["Maple Grove US-MN, United States | N/A", "Maple Grove, MN, US"], "Maple Grove, MN"),
-        (["Irvine, CA 92602, United States"], "Irvine, CA"),
-        (["Naples, FL, US, 34108"], "Naples, FL"),
-        (["Boston, MA 02110-1234"], "Boston, MA"),
-        (["La Jolla, California, United States"], "La Jolla, CA"),
-        (["Newark, Delaware, United States of America"], "Newark, DE"),
-        (["Washington, District of Columbia, USA"], "Washington, DC"),
-        (["New York, NY, US"], "New York, NY"),
-        (["Cleveland, Bolivar, MS"], "Cleveland, Bolivar, MS"),
-        (["Columbus, NE"], "Columbus, NE"),
-        (["Pennsylvania, United States"], "Pennsylvania"),
-        (["United States | N/A", "US"], "United States"),
-        (["Remote, United States of America"], "Remote, United States"),
+        (
+            ["Maple Grove US-MN, United States | N/A", "Maple Grove, MN, US"],
+            "Maple Grove, MN, US",
+        ),
+        (["Irvine, CA 92602, United States"], "Irvine, CA, US"),
+        (["Naples, FL, US, 34108"], "Naples, FL, US"),
+        (["Boston, MA 02110-1234"], "Boston, MA, US"),
+        (["Boston 02110, MA"], "Boston, MA, US"),
+        (["La Jolla, California, United States"], "La Jolla, CA, US"),
+        (["Newark, Delaware, United States of America"], "Newark, DE, US"),
+        (["Washington, District of Columbia, USA"], "Washington, DC, US"),
+        (["New York, NY, US"], "New York, NY, US"),
+        (["Cleveland, Bolivar, MS"], "Cleveland, Bolivar, MS, US"),
+        (["Columbus, NE"], "Columbus, NE, US"),
+        (["Pennsylvania, United States"], "PA, US"),
+        (["United States | N/A", "US"], "US"),
+        (["United States", "Boston, MA", "Massachusetts"], "Boston, MA, US"),
+        (["Remote, United States of America"], "Remote, US"),
         (
             ["Utrecht, UT, NL", "Utrecht, Netherlands | N/A"],
             "Utrecht, UT, NL; Utrecht, Netherlands",
         ),
         (["Toronto, ON, CA"], "Toronto, ON, CA"),
         (["Dublin, D02 X285, Ireland"], "Dublin, D02 X285, Ireland"),
+        (["Galway, H91 12345, Ireland"], "Galway, H91, Ireland"),
         (["  Bldg 4 / Lab 2 - Remote (Hybrid)  "], "Bldg 4 / Lab 2 - Remote (Hybrid)"),
         (["N/A"], ""),
     ],
@@ -182,7 +189,47 @@ def test_more_count_is_of_distinct_places_after_tidying():
         "Boston, MA",
         "Remote | N/A",
     ]
-    assert shown_location(*places) == ("Irvine, CA; Austin, TX; Boston, MA (+2 more)")
+    assert shown_location(*places) == ("Irvine, CA, US; Austin, TX, US; Boston, MA, US (+2 more)")
+
+
+@pytest.mark.parametrize(
+    "stored, expected",
+    [
+        (
+            "New Kensington, Pennsylvania, United States, Pennsylvania, United States of America",
+            "New Kensington, PA, US",
+        ),
+        (
+            "Marlborough US-MA, United States | N/A; Marlboro, MA, US",
+            "Marlborough, MA, US",
+        ),
+        (
+            "Fremont, CA 94536, United States; Irvine, CA",
+            "Fremont, CA, US; Irvine, CA, US",
+        ),
+        ("United States | N/A; US", "US"),
+        (
+            "Irvine, CA; Austin, TX; Boston, MA (+2 more)",
+            "Irvine, CA, US; Austin, TX, US; Boston, MA, US (+2 more)",
+        ),
+        ("Pennsylvania", "PA, US"),
+        ("", ""),
+    ],
+)
+def test_tidy_location_rewrites_text_stored_by_older_rules(stored, expected):
+    assert tidy_location(stored) == expected
+    assert tidy_location(expected) == expected
+
+
+def test_reconcile_tidies_rows_it_did_not_read():
+    closed = record(
+        status="closed",
+        closed_on="2026-10-01",
+        close_reason="missing",
+        location="Newark, Delaware, United States of America",
+    )
+    (row,) = reconcile([closed], [], "2026-11-02", season=SEASON)
+    assert row["location"] == "Newark, DE, US"
 
 
 def submitted(url="https://acme.example/jobs/77", company="Acme", today="2026-11-01", **overrides):
@@ -191,7 +238,7 @@ def submitted(url="https://acme.example/jobs/77", company="Acme", today="2026-11
         "id": listing_id(company, "submitted", url, url),
         "company": company,
         "title": "Quality Engineering Intern",
-        "location": "Minneapolis, MN",
+        "location": "Minneapolis, MN, US",
         "url": url,
         "platform": "submitted",
         "external_id": url,
