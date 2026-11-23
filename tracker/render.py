@@ -12,6 +12,7 @@ from datetime import date
 from urllib.parse import quote, urlsplit
 
 from tracker.config import Settings
+from tracker.places import tidy_location
 from tracker.screen import FAMILIES
 
 START_MARKER = "<!-- listings:start -->"
@@ -120,7 +121,7 @@ def listings_block(listings: list[dict], status: dict, settings: Settings) -> st
         ]
         lines += [
             f"| {cell(row['company'])} | {cell(row['title'])} | "
-            f"{cell(row['location']) or '—'} | {apply_button(row['url'])} | "
+            f"{location_cell(row['location'])} | {apply_button(row['url'])} | "
             f"{age(_since(row), today)} |"
             for row in rows
         ]
@@ -130,6 +131,11 @@ def listings_block(listings: list[dict], status: dict, settings: Settings) -> st
     lines += _company_table(listings, status, settings)
     lines.append(END_MARKER)
     return "\n".join(lines)
+
+
+def location_cell(text: str) -> str:
+    """A location table cell, in today's format whenever the text was stored."""
+    return cell(tidy_location(text)) or "—"
 
 
 def program_pages(current: list[dict], settings: Settings) -> list:
@@ -159,7 +165,7 @@ def _program_section(programs: list) -> list[str]:
     ]
     lines += [
         f"| {cell(company.name)} | {cell(company.program.label)} | "
-        f"{cell(company.program.location) or '—'} | {apply_button(company.program.url)} | — |"
+        f"{location_cell(company.program.location)} | {apply_button(company.program.url)} | — |"
         for company in programs
     ]
     lines.append("")
@@ -264,7 +270,7 @@ def closed_page(listings: list[dict]) -> str:
         "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     lines += [
-        f"| {cell(row['company'])} | {cell(row['title'])} | {cell(row['location']) or '—'} | "
+        f"| {cell(row['company'])} | {cell(row['title'])} | {location_cell(row['location'])} | "
         f"{cell(row['season'])} | {row['first_seen']} | {row['closed_on']} | "
         f"{cell(row['close_reason'])} |"
         for row in closed[:CLOSED_LIMIT]

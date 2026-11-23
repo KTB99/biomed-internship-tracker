@@ -90,7 +90,7 @@ def test_add_writes_a_submitted_listing_and_the_views(tmp_path, monkeypatch, cap
         "id": listing_id("Medtronic", "submitted", URL, URL),
         "company": "Medtronic",
         "title": "Quality Engineering Intern",
-        "location": "Minneapolis, MN",
+        "location": "Minneapolis, MN, US",
         "url": URL,
         "platform": "submitted",
         "external_id": URL,

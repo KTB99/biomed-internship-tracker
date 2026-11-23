@@ -33,13 +33,12 @@ from urllib.parse import urlsplit
 
 from tracker.ids import listing_id
 from tracker.models import Lead
-from tracker.places import is_us_location, tidy_place
+from tracker.places import display_location, tidy_location
 from tracker.screen import Verdict
 
 MISSES_TO_CLOSE = 2
 SUBMITTED = "submitted"
 REFRESHED_FIELDS = ("title", "location", "url", "family", "season")
-MAX_LOCATIONS_SHOWN = 3
 
 
 @dataclass
@@ -77,20 +76,12 @@ def new_record(lead: Lead, verdict: Verdict, *, season: str, today: str) -> dict
     }
 
 
-def display_location(locations: list[str]) -> str:
-    tidied = (tidy_place(place) for place in locations)
-    unique = list(dict.fromkeys(place for place in tidied if place))
-    ordered = sorted(unique, key=lambda place: not is_us_location(place))  # stable: US first
-    shown = "; ".join(ordered[:MAX_LOCATIONS_SHOWN])
-    if len(ordered) > MAX_LOCATIONS_SHOWN:
-        shown += f" (+{len(ordered) - MAX_LOCATIONS_SHOWN} more)"
-    return shown[:300]
-
-
 def reconcile(
     existing: list[dict], runs: list[CompanyRun], today: str, *, season: str
 ) -> list[dict]:
     by_id = {row["id"]: dict(row) for row in existing}
+    for row in by_id.values():  # rows not read this run keep older text
+        row["location"] = tidy_location(row["location"])
     for row in by_id.values():
         if row["status"] == "open" and (row.get("closes_on") or today) < today:
             row.update(status="closed", closed_on=today, close_reason="deadline")
