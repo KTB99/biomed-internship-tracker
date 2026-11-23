@@ -194,7 +194,9 @@ company in [`companies.toml`](companies.toml) it:
 1. Reads the company's public job board: Greenhouse, Lever, SmartRecruiters,
    Eightfold, Phenom, Oracle Recruiting Cloud, Pinpoint, TalentBrew, SAP
    SuccessFactors (jobs2web), Paradox, Kentico job search, or JobPosting markup
-   on the careers page.
+   on the careers page. Workday's jobs API rate-limits the tracker, so a
+   company that posts only on Workday is read from its careers page
+   ([ADR 0001](docs/adr/0001-no-workday-jobs-api.md)).
 2. Screens every posting: it must be an internship or summer co-op, in the US,
    STEM, for the target summer, and not PhD-only.
 3. Updates the catalog. A posting missing from a successful read on two
