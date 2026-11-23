@@ -75,20 +75,71 @@ def is_us_country(country: str) -> bool:
 
 
 _PLACE_PARTS = re.compile(r"[,|]")
+_ZIP = re.compile(r"\d{5}(?:-\d{4})?")
+_STATE_THEN_ZIP = re.compile(r"(?P<state>[A-Z]{2})\s+\d{5}(?:-\d{4})?")  # "CA 94536"
+_CITY_THEN_STATE = re.compile(r"(?P<city>.+?)\s+US-(?P<state>[A-Z]{2})")  # "Maple Grove US-MN"
+_STATE_CODES_BY_NAME = {name.casefold(): code for code, name in STATES.items()}
 
 
 def tidy_place(place: str) -> str:
-    """One place's text for display: each component once, without board placeholders."""
-    parts: list[str] = []
-    seen: set[str] = set()
-    for part in _PLACE_PARTS.split(place):
-        part = part.strip()
-        if not part or part.upper() == "N/A":
+    """One place's text for display, each component once and without board placeholders.
+
+    A US place with a state reads "City, ST" ("Irvine, CA 92602, United States"
+    becomes "Irvine, CA"); one that names only its state reads as the state's
+    full name. Other places keep their components as given.
+    """
+    parts = [part.strip() for part in _PLACE_PARTS.split(place)]
+    parts = [part for part in parts if part and part.upper() != "N/A"]
+    if is_us_location(place):
+        us_place = _us_place(parts)
+        if us_place is not None:
+            return us_place
+    return ", ".join(_unique("United States" if is_us_country(part) else part for part in parts))
+
+
+def _us_place(parts: list[str]) -> str | None:
+    """A US place as "City, ST", or None when it names no state.
+
+    The last component that is a state is the place's state. Earlier copies of
+    that state are dropped, except a leading full name before a state code,
+    which is the city ("New York, NY").
+    """
+    pieces: list[str] = []
+    for part in parts:
+        if is_us_country(part) or _ZIP.fullmatch(part):
             continue
-        if is_us_country(part):
-            part = "United States"
-        if part.casefold() in seen:
-            continue
-        seen.add(part.casefold())
-        parts.append(part)
-    return ", ".join(parts)
+        if match := _CITY_THEN_STATE.fullmatch(part):
+            pieces += [match["city"], match["state"]]
+        elif match := _STATE_THEN_ZIP.fullmatch(part):
+            pieces.append(match["state"])
+        else:
+            pieces.append(part)
+    if not pieces:
+        return "United States"
+    states = [index for index, piece in enumerate(pieces) if _state_code(piece)]
+    if not states:
+        return None
+    last = states[-1]
+    code = _state_code(pieces[last])
+    named_city = pieces[last] == code and pieces[0].casefold() == STATES[code].casefold()
+    rest = [
+        piece
+        for index, piece in enumerate(pieces)
+        if index != last and (_state_code(piece) != code or (index == 0 and named_city))
+    ]
+    rest = _unique(rest)
+    return ", ".join(rest + [code]) if rest else STATES[code]
+
+
+def _state_code(piece: str) -> str | None:
+    if piece in STATES:
+        return piece
+    return _STATE_CODES_BY_NAME.get(piece.casefold())
+
+
+def _unique(parts) -> list[str]:
+    """Parts in order, each once, ignoring case."""
+    unique: dict[str, str] = {}
+    for part in parts:
+        unique.setdefault(part.casefold(), part)
+    return list(unique.values())

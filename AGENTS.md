@@ -13,6 +13,11 @@ Guidance for coding agents working on the Biomedical Internship Tracker.
 - `tracker/reconcile.py`: how a run updates, closes and reopens listings.
 - `tracker/listing.schema.json`: the record format for `data/listings.json`.
 - `tracker/render.py`: README block and `CLOSED.md`.
+- `.github/ISSUE_TEMPLATE/add-internship.yml`: the "Add internship" issue form.
+  Its Company options are the companies with `submit_hosts` in
+  `companies.toml`; `tests/test_issue_form.py` keeps the two equal.
+- `tracker/submit.py`: turns that form's issue body into a submitted listing
+  (`platform = "submitted"`). See `docs/adr/0002-submitted-listings.md`.
 
 ## Commands
 
@@ -22,13 +27,19 @@ ruff check . && ruff format --check .
 pytest -q
 python -m tracker validate
 python -m tracker render --check
+# Accept an "Add internship" issue; the command itself makes no network calls.
+gh issue view <N> --json body -q .body | python -m tracker add --issue <N> -
 ```
 
 ## Rules
 
 - Never hand-edit `data/listings.json`, `data/status.json`, `CLOSED.md` or the
-  generated block in `README.md`. Use `python -m tracker refresh`, `render` or
-  `close`.
+  generated block in `README.md`. Use `python -m tracker refresh`, `render`,
+  `close` or `add`.
+- Submitted listings are added only with `python -m tracker add`, from an "Add
+  internship" issue. Its fields are untrusted like job-board data. A company
+  accepts submissions only when it lists `submit_hosts`; adding or removing
+  them means updating the form's Company options in the same pull request.
 - An empty read fails when the company has `EMPTY_READ_GUARD` open listings or
   its last good read (`last_good_fetched` in `data/status.json`) fetched
   `EMPTY_FETCH_GUARD` postings; both live in `tracker/pipeline.py`. If a board
@@ -40,7 +51,9 @@ python -m tracker render --check
 - Tests mock HTTP; never call live job boards from tests or CI.
 - Don't change `tracker/ids.py` without a migration: every listing ID would change.
 - New platforms must be added to `PLATFORMS`, the schema's `platform` enum and
-  the tests together.
+  the tests together. The exception is `submitted`, a record-only platform: it is
+  in the schema enum but not in `PLATFORMS`, since nothing reads it (see
+  `docs/adr/0002-submitted-listings.md`).
 - Treat everything from job boards as untrusted: escape it when rendering and
   never follow URLs it supplies outside the company's origin.
 - Requests to job boards send only the generic user agent in `tracker/http.py`.

@@ -177,4 +177,6 @@ def test_missing_parameter_is_a_clear_error():
 def test_every_platform_is_registered_and_in_the_schema():
     from tracker.catalog import SCHEMA
 
-    assert set(PLATFORMS) == set(SCHEMA["properties"]["platform"]["enum"])
+    # `submitted` is a record platform (a maintainer added the listing), not a reader.
+    assert "submitted" not in PLATFORMS
+    assert set(PLATFORMS) | {"submitted"} == set(SCHEMA["properties"]["platform"]["enum"])

@@ -9,6 +9,11 @@
 # (currently J&J MedTech, whose site refuses automated requests).
 # `search_terms` (optional, in params) replaces the default terms
 # ("intern", "internship", "co-op") on search-based platforms.
+#
+# `submit_hosts` (optional) lists the hosts an Apply URL may use when someone
+# submits a posting for the company by hand. The URL must be https and its host
+# must equal one entry exactly: no subdomains or wildcards. A company without
+# `submit_hosts` accepts no submissions.
 
 season = "summer-2027"
 
@@ -25,6 +30,7 @@ platform = "careers_page"
 careers_url = "https://www.alcon.com/careers/"
 params = { page = "https://www.alcon.com/careers/early-careers/" }
 program = { label = "Early careers", url = "https://www.alcon.com/careers/early-careers/", location = "Fort Worth, TX" }
+submit_hosts = ["alcon.wd5.myworkdayjobs.com", "www.alcon.com"]
 
 [[companies]]
 name = "Align"
@@ -112,6 +118,7 @@ platform = "careers_page"
 careers_url = "https://www.globusmedical.com/about/careers/"
 params = { page = "https://www.globusmedical.com/about/careers/" }
 program = { label = "Co-op program", url = "https://www.globusmedical.com/about/careers/", location = "Audubon, PA" }
+submit_hosts = ["globusmedical.wd5.myworkdayjobs.com", "www.globusmedical.com"]
 
 [[companies]]
 name = "Hologic"
@@ -133,6 +140,7 @@ platform = "careers_page"
 careers_url = "https://www.insulet.com/working-at-insulet"
 params = { page = "https://www.insulet.com/working-at-insulet/students-and-early-careers" }
 program = { label = "Students and early careers", url = "https://www.insulet.com/working-at-insulet/students-and-early-careers", location = "Acton, MA" }
+submit_hosts = ["insulet.wd5.myworkdayjobs.com", "www.insulet.com"]
 
 [[companies]]
 name = "Integra LifeSciences"
@@ -161,6 +169,7 @@ platform = "careers_page"
 careers_url = "https://www.medtronic.com/en-us/our-company/careers.html"
 params = { page = "https://www.medtronic.com/en-us/our-company/careers/early-careers.html" }
 program = { label = "Early careers", url = "https://www.medtronic.com/en-us/our-company/careers/early-careers.html", location = "Minneapolis, MN" }
+submit_hosts = ["medtronic.wd1.myworkdayjobs.com", "www.medtronic.com"]
 
 [[companies]]
 name = "Olympus"
@@ -189,6 +198,7 @@ platform = "careers_page"
 careers_url = "https://careers.resmed.com"
 params = { page = "https://careers.resmed.com/careers/early-careers/" }
 program = { label = "Early careers", url = "https://careers.resmed.com/careers/early-careers/", location = "San Diego, CA" }
+submit_hosts = ["resmed.wd3.myworkdayjobs.com", "careers.resmed.com"]
 
 [[companies]]
 name = "Siemens Healthineers"
@@ -203,6 +213,7 @@ platform = "careers_page"
 careers_url = "https://www.smith-nephew.com/en-us/careers"
 params = { page = "https://www.smith-nephew.com/en-us/careers" }
 program = { label = "Careers and internships", url = "https://www.smith-nephew.com/en-us/careers", location = "Andover, MA" }
+submit_hosts = ["smithnephew.wd5.myworkdayjobs.com", "www.smith-nephew.com"]
 
 [[companies]]
 name = "STERIS"
@@ -226,6 +237,7 @@ platform = "careers_page"
 careers_url = "https://www.tandemdiabetes.com/about-us/careers"
 params = { page = "https://www.tandemdiabetes.com/about-us/careers/internship-program" }
 program = { label = "Internship program", url = "https://www.tandemdiabetes.com/about-us/careers/internship-program", location = "San Diego, CA" }
+submit_hosts = ["tandemdiabetes.wd12.myworkdayjobs.com", "www.tandemdiabetes.com"]
 
 [[companies]]
 name = "Teleflex"

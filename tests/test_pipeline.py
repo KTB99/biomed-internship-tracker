@@ -1,6 +1,8 @@
 import json
 
+import pytest
 from conftest import FakeResponse, company, fake_client, settings
+from test_reconcile import submitted
 
 from tracker import catalog
 from tracker.cli import main
@@ -80,7 +82,7 @@ def test_refresh_tidies_an_existing_listings_location(tmp_path):
 
     refresh(settings(GOOD), client, files, today="2026-11-02")
     (row,) = json.loads(files.listings.read_text())
-    assert row["location"] == "New Kensington, Pennsylvania, United States"
+    assert row["location"] == "New Kensington, PA"
     assert row["first_seen"] == "2026-11-01"
     assert messy not in files.readme.read_text()
 
@@ -126,6 +128,17 @@ def test_registry_loads():
     loaded = load_settings(REGISTRY_PATH)
     assert loaded.season.startswith("summer-")
     assert len(loaded.companies) >= 5
+
+
+def test_registry_rejects_the_submitted_record_platform(tmp_path):
+    registry = tmp_path / "companies.toml"
+    registry.write_text(
+        'season = "summer-2027"\n\n[[companies]]\nname = "Acme"\nplatform = "submitted"\n'
+        'careers_url = "https://acme.example/careers"\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="unknown platform 'submitted'"):
+        load_settings(registry)
 
 
 def test_committed_catalog_is_valid_and_views_are_current():
@@ -430,3 +443,75 @@ def test_error_text_is_kept_on_one_line(tmp_path):
     assert good.error == "bad payload [failed] Steady Co: forged next"
     status = json.loads(files.status.read_text())
     assert status["companies"]["Good Co"]["error"] == good.error
+
+
+PAGE_ONLY = company("Page Co", platform="careers_page", page="https://page.example/careers")
+LINK_ONLY = company("Link Co", platform="link")
+
+
+def test_submitted_listings_of_companies_reading_no_job_board_never_go_missing(tmp_path):
+    files = paths(tmp_path)
+    rows = [
+        submitted("https://page.example/jobs/1", company="Page Co"),
+        submitted("https://link.example/jobs/1", company="Link Co"),
+        submitted("https://good.example/jobs/1", company="Good Co"),
+    ]
+    files.listings.parent.mkdir(parents=True)
+    files.listings.write_text(json.dumps(rows), encoding="utf-8")
+
+    def respond(method, url, kwargs):
+        if "page.example" in url:
+            return FakeResponse(body="<html><p>Apply on Workday</p></html>")
+        return FakeResponse({"jobs": STEADY_JOBS})
+
+    for today in ("2026-11-02", "2026-11-03"):
+        client, _ = fake_client(respond)
+        refresh(settings(GOOD, PAGE_ONLY, LINK_ONLY), client, files, today=today)
+
+    listings = {
+        row["company"]: row
+        for row in json.loads(files.listings.read_text())
+        if row["platform"] == "submitted"
+    }
+    assert (listings["Page Co"]["status"], listings["Page Co"]["misses"]) == ("open", 0)
+    assert (listings["Link Co"]["status"], listings["Link Co"]["misses"]) == ("open", 0)
+    assert (listings["Good Co"]["status"], listings["Good Co"]["close_reason"]) == (
+        "closed",
+        "missing",
+    )
+
+
+def test_submitted_listings_do_not_make_an_empty_careers_page_read_fail(tmp_path):
+    files = paths(tmp_path)
+    rows = [
+        submitted(f"https://page.example/jobs/{n}", company="Page Co")
+        for n in range(EMPTY_READ_GUARD + 1)
+    ]
+    files.listings.parent.mkdir(parents=True)
+    files.listings.write_text(json.dumps(rows), encoding="utf-8")
+    client, _ = fake_client(lambda *args: FakeResponse(body="<html><p>Apply on Workday</p></html>"))
+
+    result = refresh(settings(PAGE_ONLY), client, files, today="2026-11-02")
+
+    (run,) = result.runs
+    assert (run.ok, run.error) == (True, None)
+    assert result.written
+
+
+def test_screening_rejecting_every_read_listing_fails_despite_a_submitted_one(tmp_path):
+    files = paths(tmp_path)
+    jobs = [greenhouse_job(n, f"Software Engineering Intern {n}") for n in range(EMPTY_READ_GUARD)]
+    client, _ = fake_client(handler(jobs))
+    refresh(settings(GOOD), client, files, today="2026-11-01")
+    rows = json.loads(files.listings.read_text())
+    rows.append(submitted("https://good.example/jobs/1", company="Good Co"))
+    files.listings.write_text(json.dumps(rows), encoding="utf-8")
+
+    changed = [greenhouse_job(n, f"{INELIGIBLE_TITLE} {n}") for n in range(EMPTY_READ_GUARD)]
+    client, _ = fake_client(handler(changed))
+    result = refresh(settings(GOOD), client, files, today="2026-11-02")
+
+    (run,) = result.runs
+    assert run.error == (
+        f"screening rejected all {EMPTY_READ_GUARD} open listings; treating as a changed response"
+    )
