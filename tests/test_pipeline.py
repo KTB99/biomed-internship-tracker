@@ -58,6 +58,8 @@ def test_refresh_writes_catalog_views_and_log(tmp_path):
         "fetched": 2,
         "accepted": 1,
         "error": None,
+        "last_good_fetched": 2,
+        "last_good_date": "2026-11-01",
     }
     assert status["companies"]["Broken Co"]["ok"] is False
     assert "blocked" in status["companies"]["Broken Co"]["error"]
@@ -253,3 +255,163 @@ def test_screening_rejecting_every_open_listing_counts_as_failure(tmp_path):
         f"screening rejected all {EMPTY_READ_GUARD} open listings; treating as a changed response"
     )
     assert files.listings.read_text() == before
+
+
+STEADY = company("Steady Co", platform="greenhouse", board="steady")
+
+
+def boards(**jobs_by_board):
+    """Greenhouse answers per board; a board not named returns no jobs."""
+
+    def respond(method, url, kwargs):
+        for board, jobs in jobs_by_board.items():
+            if f"/boards/{board}/" in url:
+                return FakeResponse({"jobs": jobs})
+        return FakeResponse({"jobs": []})
+
+    return respond
+
+
+def unscreened(count):
+    """Postings that all fail screening: the read fetches them but accepts none."""
+    return [greenhouse_job(n, f"Sales Intern {n}") for n in range(count)]
+
+
+STEADY_JOBS = [greenhouse_job(100, "Software Engineering Intern")]
+
+
+def read_days(files, *days):
+    """Run one refresh per (date, Good Co's jobs) pair; Steady Co always reads fine."""
+    for today, good_jobs in days:
+        client, _ = fake_client(boards(good=good_jobs, steady=STEADY_JOBS))
+        refresh(settings(GOOD, STEADY), client, files, today=today)
+    return json.loads(files.status.read_text())["companies"]["Good Co"]
+
+
+def failed_reads_cell(files) -> str:
+    """The "Failed reads" cell of the README's stats row."""
+    lines = files.readme.read_text().splitlines()
+    header = next(n for n, line in enumerate(lines) if "Failed reads" in line)
+    columns = [part.strip() for part in lines[header].split("|")]
+    return [part.strip() for part in lines[header + 2].split("|")][columns.index("Failed reads")]
+
+
+def test_empty_read_after_a_large_fetch_counts_as_failure(tmp_path):
+    files = paths(tmp_path)
+    good = read_days(files, ("2026-11-01", unscreened(20)), ("2026-11-02", []))
+
+    assert good["ok"] is False
+    assert good["error"] == "returned no postings after 20 last time"
+    assert (good["last_good_fetched"], good["last_good_date"]) == (20, "2026-11-01")
+    assert failed_reads_cell(files) == "Good Co"
+
+
+def test_empty_read_keeps_failing_while_the_reader_stays_broken(tmp_path):
+    files = paths(tmp_path)
+    good = read_days(files, ("2026-11-01", unscreened(20)), ("2026-11-02", []), ("2026-11-03", []))
+
+    assert good["ok"] is False
+    assert good["error"] == "returned no postings after 20 last time"
+    assert (good["last_good_fetched"], good["last_good_date"]) == (20, "2026-11-01")
+
+
+def test_dry_run_reports_an_empty_read_after_a_large_fetch_and_writes_nothing(tmp_path):
+    files = paths(tmp_path)
+    read_days(files, ("2026-11-01", unscreened(20)))
+    before = {path: path.read_text() for path in (files.listings, files.status, files.readme)}
+
+    client, _ = fake_client(boards(good=[], steady=STEADY_JOBS))
+    result = refresh(settings(GOOD, STEADY), client, files, today="2026-11-02", dry_run=True)
+
+    good = next(run for run in result.runs if run.company == "Good Co")
+    assert (good.ok, good.error) == (False, "returned no postings after 20 last time")
+    assert not result.written
+    assert {path: path.read_text() for path in before} == before
+
+
+def test_reader_that_always_fetches_nothing_stays_ok(tmp_path):
+    files = paths(tmp_path)
+    good = read_days(files, ("2026-11-01", []), ("2026-11-02", []))
+
+    assert (good["ok"], good["error"]) == (True, None)
+    assert (good["last_good_fetched"], good["last_good_date"]) == (None, None)
+    assert failed_reads_cell(files) == "none"
+
+
+def test_empty_read_after_a_small_fetch_stays_ok_and_keeps_the_baseline(tmp_path):
+    files = paths(tmp_path)
+    good = read_days(files, ("2026-11-01", unscreened(3)), ("2026-11-02", []))
+
+    assert (good["ok"], good["fetched"], good["error"]) == (True, 0, None)
+    assert (good["last_good_fetched"], good["last_good_date"]) == (3, "2026-11-01")
+
+
+def test_successful_read_moves_the_baseline(tmp_path):
+    files = paths(tmp_path)
+    good = read_days(files, ("2026-11-01", unscreened(20)), ("2026-11-02", unscreened(12)))
+
+    assert good["ok"] is True
+    assert (good["last_good_fetched"], good["last_good_date"]) == (12, "2026-11-02")
+
+
+def test_status_from_before_baselines_means_only_the_open_listings_guard_applies(tmp_path):
+    files = paths(tmp_path)
+    read_days(files, ("2026-11-01", unscreened(20)))
+    old = json.loads(files.status.read_text())
+    for entry in old["companies"].values():
+        del entry["last_good_fetched"], entry["last_good_date"]
+    files.status.write_text(json.dumps(old), encoding="utf-8")
+
+    good = read_days(files, ("2026-11-02", []))
+
+    assert (good["ok"], good["error"]) == (True, None)
+    assert (good["last_good_fetched"], good["last_good_date"]) == (None, None)
+
+
+def cli_on(monkeypatch, files):
+    """Point `python -m tracker` at the test's files and companies."""
+    monkeypatch.setattr("tracker.cli.Paths.default", lambda: files)
+    monkeypatch.setattr("tracker.cli.load_settings", lambda: settings(GOOD, STEADY))
+
+
+def test_reset_baseline_lets_the_next_empty_read_pass(tmp_path, monkeypatch, capsys):
+    files = paths(tmp_path)
+    read_days(files, ("2026-11-01", unscreened(20)), ("2026-11-02", []))
+    cli_on(monkeypatch, files)
+
+    assert main(["reset-baseline", "Good Co"]) == 0
+    reset = json.loads(files.status.read_text())["companies"]["Good Co"]
+    assert (reset["last_good_fetched"], reset["last_good_date"]) == (None, None)
+    assert "Good Co" in capsys.readouterr().out
+
+    good = read_days(files, ("2026-11-03", []))
+    assert (good["ok"], good["error"]) == (True, None)
+
+
+def test_reset_baseline_of_an_unknown_company_fails(tmp_path, monkeypatch, capsys):
+    files = paths(tmp_path)
+    read_days(files, ("2026-11-01", unscreened(20)))
+    before = files.status.read_text()
+    cli_on(monkeypatch, files)
+
+    assert main(["reset-baseline", "Nobody Inc"]) == 1
+    assert "Nobody Inc" in capsys.readouterr().out
+    assert files.status.read_text() == before
+
+
+def test_error_text_is_kept_on_one_line(tmp_path):
+    # Error text can come from a job board. Kept on one line, it can't forge
+    # another company's "[failed]" line in the refresh output.
+    def respond(method, url, kwargs):
+        if "/boards/good/" in url:
+            return ValueError("bad payload\n[failed] Steady Co: forged\r\n\tnext")
+        return FakeResponse({"jobs": STEADY_JOBS})
+
+    client, _ = fake_client(respond)
+    files = paths(tmp_path)
+    result = refresh(settings(GOOD, STEADY), client, files, today="2026-11-01")
+
+    good = next(run for run in result.runs if run.company == "Good Co")
+    assert good.error == "bad payload [failed] Steady Co: forged next"
+    status = json.loads(files.status.read_text())
+    assert status["companies"]["Good Co"]["error"] == good.error

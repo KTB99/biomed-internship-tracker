@@ -13,11 +13,19 @@ from tracker.ids import listing_id
 from tracker.reconcile import CompanyRun, new_record, reconcile
 from tracker.screen import screen
 from tracker.sources import fetch_leads
+from tracker.text import clean
 
 # A company that suddenly returns nothing while this many listings are open, or
 # whose open listings screening suddenly rejects all at once, is more likely a
 # changed or broken API than a mass closure. Treat the read as failed.
 EMPTY_READ_GUARD = 3
+
+# A company whose last good read fetched at least this many postings (eligible
+# or not) and that now returns nothing most likely has a broken reader: most
+# companies have few open listings, so EMPTY_READ_GUARD alone misses them. Treat
+# the read as failed until the reader is fixed or the baseline is reset
+# (`python -m tracker reset-baseline <company>`).
+EMPTY_FETCH_GUARD = 10
 
 
 @dataclass(frozen=True)
@@ -39,6 +47,17 @@ class Paths:
         )
 
 
+@dataclass(frozen=True)
+class Baseline:
+    """A company's last good read that fetched something: how many, and when.
+
+    Stored in data/status.json as `last_good_fetched` and `last_good_date`.
+    """
+
+    fetched: int
+    date: str
+
+
 @dataclass
 class RefreshResult:
     runs: list[CompanyRun]
@@ -51,21 +70,30 @@ class RefreshResult:
 
 
 def read_company(
-    client: Client, company, settings: Settings, today: str, open_listings: list[dict]
+    client: Client,
+    company,
+    settings: Settings,
+    today: str,
+    open_listings: list[dict],
+    baseline: Baseline | None,
 ):
     """Return (CompanyRun, rejected-lead log entries) for one company.
 
-    `open_listings` are the company's open catalog rows before this run.
+    `open_listings` are the company's open catalog rows before this run, and
+    `baseline` is its last good read that fetched something (None if none).
     """
     if company.link_only:
         return CompanyRun(company.name, ok=True), []
     try:
         leads = fetch_leads(client, company)
     except (SourceError, ValueError, KeyError, TypeError, AttributeError) as exc:
-        return CompanyRun(company.name, ok=False, error=str(exc)[:300]), []
+        return _failed(company, str(exc)), []
     if not leads and len(open_listings) >= EMPTY_READ_GUARD:
-        error = f"returned no postings while {len(open_listings)} listings are open"
-        return CompanyRun(company.name, ok=False, error=error), []
+        return _failed(
+            company, f"returned no postings while {len(open_listings)} listings are open"
+        ), []
+    if not leads and baseline and baseline.fetched >= EMPTY_FETCH_GUARD:
+        return _failed(company, f"returned no postings after {baseline.fetched} last time"), []
     run = CompanyRun(company.name, ok=True, fetched=len(leads))
     rejected = []
     for lead in leads:
@@ -92,8 +120,14 @@ def read_company(
         error = (
             f"screening rejected all {len(in_season)} open listings; treating as a changed response"
         )
-        return CompanyRun(company.name, ok=False, fetched=len(leads), error=error), rejected
+        return _failed(company, error, fetched=len(leads)), rejected
     return run, rejected
+
+
+def _failed(company, error: str, *, fetched: int = 0) -> CompanyRun:
+    # Error text can come from a job board. One line of it per company keeps the
+    # refresh output's "[failed] <company>: <error>" lines unforgeable.
+    return CompanyRun(company.name, ok=False, fetched=fetched, error=clean(error)[:300])
 
 
 def refresh(
@@ -101,13 +135,16 @@ def refresh(
 ) -> RefreshResult:
     existing = catalog.load(paths.listings)
     catalog.check(existing)
+    previous = load_status(paths.status).get("companies", {})
     runs: list[CompanyRun] = []
     rejected: list[dict] = []
     for company in settings.companies:
         open_listings = [
             row for row in existing if row["company"] == company.name and row["status"] == "open"
         ]
-        run, company_rejected = read_company(client, company, settings, today, open_listings)
+        run, company_rejected = read_company(
+            client, company, settings, today, open_listings, _baseline(previous.get(company.name))
+        )
         runs.append(run)
         rejected.extend(company_rejected)
     result = RefreshResult(runs=runs, rejected=rejected, written=False)
@@ -115,7 +152,7 @@ def refresh(
         return result
     listings = reconcile(existing, runs, today, season=settings.season)
     catalog.check(listings)
-    status = status_document(settings, runs, today)
+    status = status_document(settings, runs, today, previous)
     files = outputs(paths, settings, listings, status)
     files[paths.screening_log] = json.dumps(rejected, indent=2, ensure_ascii=False) + "\n"
     catalog.write_all(files)
@@ -123,19 +160,51 @@ def refresh(
     return result
 
 
-def status_document(settings: Settings, runs: list[CompanyRun], today: str) -> dict:
+def status_document(settings: Settings, runs: list[CompanyRun], today: str, previous: dict) -> dict:
+    """The status document for this run.
+
+    `previous` is the last status document's "companies" map. A company's
+    baseline moves only on a good read that fetched something; otherwise it is
+    carried over.
+    """
+    companies = {}
+    for run in sorted(runs, key=lambda item: item.company.lower()):
+        if run.ok and run.fetched > 0:
+            baseline = Baseline(fetched=run.fetched, date=today)
+        else:
+            baseline = _baseline(previous.get(run.company))
+        companies[run.company] = {
+            "ok": run.ok,
+            "fetched": run.fetched,
+            "accepted": len(run.accepted),
+            "error": run.error,
+            **_baseline_fields(baseline),
+        }
+    return {"last_run": today, "season": settings.season, "companies": companies}
+
+
+def reset_baseline(path: Path, company: str) -> bool:
+    """Forget a company's baseline in the status file, so its next empty read
+    is accepted. False if the status file has no entry for that company."""
+    status = load_status(path)
+    entry = status.get("companies", {}).get(company)
+    if entry is None:
+        return False
+    entry.update(_baseline_fields(None))
+    catalog.write_all({path: dump_status(status)})
+    return True
+
+
+def _baseline(entry: dict | None) -> Baseline | None:
+    """A status entry's baseline. Entries written before baselines have none."""
+    fetched = (entry or {}).get("last_good_fetched")
+    return None if fetched is None else Baseline(fetched=fetched, date=entry["last_good_date"])
+
+
+def _baseline_fields(baseline: Baseline | None) -> dict:
     return {
-        "last_run": today,
-        "season": settings.season,
-        "companies": {
-            run.company: {
-                "ok": run.ok,
-                "fetched": run.fetched,
-                "accepted": len(run.accepted),
-                "error": run.error,
-            }
-            for run in sorted(runs, key=lambda item: item.company.lower())
-        },
+        "last_good_fetched": baseline.fetched if baseline else None,
+        "last_good_date": baseline.date if baseline else None,
     }
 
 
@@ -145,10 +214,14 @@ def outputs(paths: Paths, settings: Settings, listings: list[dict], status: dict
     block = render.listings_block(listings, status, settings)
     return {
         paths.listings: catalog.dumps(listings),
-        paths.status: json.dumps(status, indent=2, ensure_ascii=False) + "\n",
+        paths.status: dump_status(status),
         paths.readme: render.splice(readme, block),
         paths.closed: render.closed_page(listings),
     }
+
+
+def dump_status(status: dict) -> str:
+    return json.dumps(status, indent=2, ensure_ascii=False) + "\n"
 
 
 def load_status(path: Path) -> dict:

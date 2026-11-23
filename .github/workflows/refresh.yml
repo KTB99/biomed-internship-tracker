@@ -51,6 +51,12 @@ jobs:
 
       # Both refresh steps echo text from job boards to the log, so workflow
       # commands are paused around them and a posting can't inject "::" commands.
+      # The output is saved for failed-reads.sh, which emits one escaped warning
+      # per failed read once commands are resumed and lists the failed reads in
+      # the job summary (a dry run's summary also shows the whole output,
+      # HTML-escaped so text from job boards can't alter it). Each step still
+      # exits with the command's status, so a run in which every company failed
+      # stops the job.
       - name: Refresh listings (dry run)
         if: ${{ inputs.dry_run }}
         run: |
@@ -61,24 +67,28 @@ jobs:
           status=0
           python -m tracker refresh --dry-run 2>&1 | tee "${out}" || status=$?
           echo "::${token}::"
-          # HTML-escaped inside <pre> so text from job boards can't alter the summary.
+          bash .github/scripts/failed-reads.sh annotations "${out}"
           {
             echo "### Dry run on \`${GITHUB_REF_NAME}\` (exit ${status})"
             echo
-            echo "<pre>"
-            sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' "${out}"
-            echo "</pre>"
+            bash .github/scripts/failed-reads.sh log "${out}"
+            echo
+            bash .github/scripts/failed-reads.sh summary "${out}"
           } >> "${GITHUB_STEP_SUMMARY}"
           exit "${status}"
 
       - name: Refresh listings
         if: ${{ !inputs.dry_run }}
         run: |
+          set -o pipefail
+          out="${RUNNER_TEMP}/refresh.txt"
           token="$(openssl rand -hex 16)"
           echo "::stop-commands::${token}"
           status=0
-          python -m tracker refresh || status=$?
+          python -m tracker refresh 2>&1 | tee "${out}" || status=$?
           echo "::${token}::"
+          bash .github/scripts/failed-reads.sh annotations "${out}"
+          bash .github/scripts/failed-reads.sh summary "${out}" >> "${GITHUB_STEP_SUMMARY}"
           exit "${status}"
 
       # Pull requests opened with GITHUB_TOKEN do not trigger other workflows,
@@ -116,10 +126,22 @@ jobs:
           pr_url="$(gh pr list --head "${branch}" --base main --state open \
             --json url,isCrossRepository \
             --jq '[.[] | select(.isCrossRepository | not)][0].url // empty')"
+          # The body lists this run's failed reads, if any. A reused pull
+          # request gets the new body, so it never shows an earlier run's.
+          body="${RUNNER_TEMP}/pr-body.md"
+          report="$(bash .github/scripts/failed-reads.sh report "${RUNNER_TEMP}/refresh.txt")"
+          {
+            echo "Automated listing refresh. Checks ran in the workflow before this PR was opened."
+            if [ -n "${report}" ]; then
+              echo
+              echo "${report}"
+            fi
+          } > "${body}"
           if [ -z "${pr_url}" ]; then
             pr_url="$(gh pr create --base main --head "${branch}" \
-              --title "data: daily refresh ${day}" \
-              --body "Automated listing refresh. Checks ran in the workflow before this PR was opened.")"
+              --title "data: daily refresh ${day}" --body-file "${body}")"
+          else
+            gh pr edit "${pr_url}" --body-file "${body}"
           fi
           echo "Pull request: ${pr_url}" | tee -a "${GITHUB_STEP_SUMMARY}"
           if [ "${AUTOMERGE}" = "false" ]; then

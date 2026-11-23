@@ -36,7 +36,7 @@ _MARKDOWN_SPECIAL = re.compile(r"([\\`*_{}\[\]()#+!|~])")
 
 
 def cell(text: object) -> str:
-    value = " ".join(str(text or "").split())
+    value = " ".join(("" if text is None else str(text)).split())
     value = value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     return _MARKDOWN_SPECIAL.sub(r"\\\1", value)
 
@@ -199,8 +199,8 @@ def _company_table(listings: list[dict], status: dict, settings: Settings) -> li
     lines = [
         "## Companies",
         "",
-        "| Company | Platform | Open | Last read |",
-        "| --- | --- | --- | --- |",
+        "| Company | Platform | Open | Last read | Fetched |",
+        "| --- | --- | --- | --- | ---: |",
     ]
     for company in sorted(settings.companies, key=lambda item: item.name.lower()):
         open_count = sum(
@@ -211,16 +211,19 @@ def _company_table(listings: list[dict], status: dict, settings: Settings) -> li
             and row["season"] == settings.season
         )
         result = results.get(company.name)
+        fetched = "—"
         if company.link_only:
             state = "link only"
         elif result is None:
             state = "—"
         else:
             state = "ok" if result.get("ok") else "failed"
+            if result.get("fetched") is not None:
+                fetched = cell(result["fetched"])
         lines.append(
             f"| {link(company.name, company.careers_url)} | "
             f"{'—' if company.link_only else cell(company.platform)} | "
-            f"{open_count} | {state} |"
+            f"{open_count} | {state} | {fetched} |"
         )
     lines.append("")
     return lines

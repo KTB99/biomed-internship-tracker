@@ -149,40 +149,40 @@ Closed listings are in [CLOSED.md](CLOSED.md).
 
 ## Companies
 
-| Company | Platform | Open | Last read |
-| --- | --- | --- | --- |
-| [Abbott](https://www.jobs.abbott) | phenom | 4 | ok |
-| [Alcon](https://www.alcon.com/careers/) | careers\_page | 0 | ok |
-| [Align](https://jobs.aligntech.com/careers) | pinpoint | 0 | ok |
-| [Arthrex](https://careers.arthrex.com) | jobs2web | 1 | ok |
-| [Baxter](https://jobs.baxter.com) | talentbrew | 0 | ok |
-| [BD](https://jobs.bd.com) | talentbrew | 2 | ok |
-| [Biotronik](https://www.biotronik.com/en-us/careers) | careers\_page | 0 | ok |
-| [Boston Scientific](https://bostonscientific.eightfold.ai/careers) | eightfold | 3 | ok |
-| [CONMED](https://careers.conmed.com) | phenom | 0 | ok |
-| [CooperCompanies](https://hcjy.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1) | oracle | 0 | ok |
-| [Dexcom](https://careers.dexcom.com) | eightfold | 0 | ok |
-| [Edwards](https://www.edwards.com/careers) | algolia | 0 | ok |
-| [GE HealthCare](https://careers.gehealthcare.com) | phenom | 0 | ok |
-| [Globus Medical](https://www.globusmedical.com/about/careers/) | careers\_page | 0 | ok |
-| [Hologic](https://ebwb.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX) | oracle | 0 | ok |
-| [Inspire Medical Systems](https://job-boards.greenhouse.io/inspiremedicalsystemsinc) | greenhouse | 0 | ok |
-| [Insulet](https://www.insulet.com/working-at-insulet) | careers\_page | 0 | ok |
-| [Integra LifeSciences](https://www.integralife.com/careers/job-search) | kentico | 0 | ok |
-| [Intuitive](https://careers.intuitive.com) | smartrecruiters | 14 | ok |
-| [J&amp;J MedTech](https://www.careers.jnj.com) | — | 0 | link only |
-| [Medtronic](https://www.medtronic.com/en-us/our-company/careers.html) | careers\_page | 0 | ok |
-| [Olympus](https://careers.olympusamerica.com) | jobs2web | 0 | ok |
-| [Penumbra](https://jobs.lever.co/penumbrainc) | lever | 0 | ok |
-| [Philips](https://www.careers.philips.com) | phenom | 2 | ok |
-| [ResMed](https://careers.resmed.com) | careers\_page | 0 | ok |
-| [Siemens Healthineers](https://careers.siemens-healthineers.com) | phenom | 3 | ok |
-| [Smith\+Nephew](https://www.smith-nephew.com/en-us/careers) | careers\_page | 0 | ok |
-| [STERIS](https://careers.steris.com) | phenom | 5 | ok |
-| [Stryker](https://careers.stryker.com) | paradox | 6 | ok |
-| [Tandem](https://www.tandemdiabetes.com/about-us/careers) | careers\_page | 0 | ok |
-| [Teleflex](https://careers.teleflex.com) | jobs2web | 1 | ok |
-| [Zimmer Biomet](https://careers.zimmerbiomet.com) | phenom | 0 | ok |
+| Company | Platform | Open | Last read | Fetched |
+| --- | --- | --- | --- | ---: |
+| [Abbott](https://www.jobs.abbott) | phenom | 4 | ok | 939 |
+| [Alcon](https://www.alcon.com/careers/) | careers\_page | 0 | ok | 0 |
+| [Align](https://jobs.aligntech.com/careers) | pinpoint | 0 | ok | 202 |
+| [Arthrex](https://careers.arthrex.com) | jobs2web | 1 | ok | 189 |
+| [Baxter](https://jobs.baxter.com) | talentbrew | 0 | ok | 46 |
+| [BD](https://jobs.bd.com) | talentbrew | 2 | ok | 55 |
+| [Biotronik](https://www.biotronik.com/en-us/careers) | careers\_page | 0 | ok | 0 |
+| [Boston Scientific](https://bostonscientific.eightfold.ai/careers) | eightfold | 3 | ok | 34 |
+| [CONMED](https://careers.conmed.com) | phenom | 0 | ok | 7 |
+| [CooperCompanies](https://hcjy.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1) | oracle | 0 | ok | 120 |
+| [Dexcom](https://careers.dexcom.com) | eightfold | 0 | ok | 3 |
+| [Edwards](https://www.edwards.com/careers) | algolia | 0 | ok | 5 |
+| [GE HealthCare](https://careers.gehealthcare.com) | phenom | 0 | ok | 121 |
+| [Globus Medical](https://www.globusmedical.com/about/careers/) | careers\_page | 0 | ok | 0 |
+| [Hologic](https://ebwb.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX) | oracle | 0 | ok | 119 |
+| [Inspire Medical Systems](https://job-boards.greenhouse.io/inspiremedicalsystemsinc) | greenhouse | 0 | ok | 73 |
+| [Insulet](https://www.insulet.com/working-at-insulet) | careers\_page | 0 | ok | 0 |
+| [Integra LifeSciences](https://www.integralife.com/careers/job-search) | kentico | 0 | ok | 1 |
+| [Intuitive](https://careers.intuitive.com) | smartrecruiters | 14 | ok | 325 |
+| [J&amp;J MedTech](https://www.careers.jnj.com) | — | 0 | link only | — |
+| [Medtronic](https://www.medtronic.com/en-us/our-company/careers.html) | careers\_page | 0 | ok | 0 |
+| [Olympus](https://careers.olympusamerica.com) | jobs2web | 0 | ok | 67 |
+| [Penumbra](https://jobs.lever.co/penumbrainc) | lever | 0 | ok | 71 |
+| [Philips](https://www.careers.philips.com) | phenom | 2 | ok | 78 |
+| [ResMed](https://careers.resmed.com) | careers\_page | 0 | ok | 0 |
+| [Siemens Healthineers](https://careers.siemens-healthineers.com) | phenom | 3 | ok | 130 |
+| [Smith\+Nephew](https://www.smith-nephew.com/en-us/careers) | careers\_page | 0 | ok | 0 |
+| [STERIS](https://careers.steris.com) | phenom | 5 | ok | 26 |
+| [Stryker](https://careers.stryker.com) | paradox | 6 | ok | 17 |
+| [Tandem](https://www.tandemdiabetes.com/about-us/careers) | careers\_page | 0 | ok | 0 |
+| [Teleflex](https://careers.teleflex.com) | jobs2web | 1 | ok | 93 |
+| [Zimmer Biomet](https://careers.zimmerbiomet.com) | phenom | 0 | ok | 32 |
 
 <!-- listings:end -->
 
@@ -203,6 +203,13 @@ company in [`companies.toml`](companies.toml) it:
    different days is closed. A current-season posting the read still returns
    but screening now rejects is removed from the catalog in that run, unless
    it was closed by hand. A company whose read fails is left untouched.
+   An empty read counts as a failed read when the company has at least
+   `EMPTY_READ_GUARD` open listings, or when its last good read fetched at
+   least `EMPTY_FETCH_GUARD` postings ("returned no postings after N last
+   time"). Both thresholds are set in
+   [`tracker/pipeline.py`](tracker/pipeline.py). That last good fetch count is
+   kept in `data/status.json` through failed runs, so the company keeps failing
+   until its reader is fixed or its baseline is reset (see Development).
    Companies with no open postings we can read are listed with a link to their
    own internship program page instead.
 4. Validates the catalog against
@@ -214,6 +221,13 @@ opens a pull request and squash-merges it. A rerun on the same day force-pushes
 that branch and reuses the day's pull request if it is still open, or opens a
 new one otherwise. Set the repository variable `REFRESH_AUTOMERGE` to `false` to
 leave the pull request open for review instead of merging it.
+
+Every run, scheduled or dispatched, lists the companies whose read failed
+(their `[failed]` lines) in the job summary and adds a warning annotation for
+each one, whether or not a pull request is opened. A refresh pull request lists
+the same failed reads in its body. If every company fails, the run writes
+nothing and the job fails. The reporting is done by
+[`.github/scripts/failed-reads.sh`](.github/scripts/failed-reads.sh).
 
 The workflow can also be dispatched by hand from the Actions tab (**Daily
 refresh** → **Run workflow**):
@@ -242,11 +256,20 @@ python -m tracker validate
 python -m tracker refresh --dry-run   # live read, writes nothing
 python -m tracker render              # rebuild README.md and CLOSED.md
 python -m tracker close <listing-id>  # close a listing by hand
+python -m tracker reset-baseline "<company>"  # accept that a board is really empty
 ```
+
+When a company really has emptied its board, its reads keep failing with
+"returned no postings after N last time". Run `python -m tracker reset-baseline
+"<company>"` and open a pull request with the `data/status.json` change. It
+clears that company's last good fetch count, so the next empty read is accepted.
 
 Tests mock all HTTP and never touch the network. To add a company on a supported
 platform, add an entry to `companies.toml`. To add a platform, see
-`tracker/sources/__init__.py`.
+`tracker/sources/__init__.py`. When a company moves to a reader that fetches
+nothing (such as `careers_page`), run `python -m tracker reset-baseline
+"<company>"` in the same pull request; otherwise its last good fetch count stays
+and its first empty read, and every one after it, fails.
 
 ## License
 

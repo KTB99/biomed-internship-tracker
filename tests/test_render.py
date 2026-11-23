@@ -120,3 +120,22 @@ def test_stats_name_failed_companies():
     status = {"last_run": "2026-11-02", "companies": {"Acme": {"ok": False}, "Beta": {"ok": True}}}
     block = listings_block([], status, settings(company("Acme"), company("Beta")))
     assert "| 2026-11-02 | 0 | 0 | 0 | 2 | Acme | 0 |" in block
+
+
+def test_company_table_shows_each_reads_fetched_count():
+    status = {
+        "last_run": "2026-11-02",
+        "companies": {
+            "Acme": {"ok": True, "fetched": 202, "accepted": 0},
+            "Beta": {"ok": False, "fetched": 0, "accepted": 0},
+            "Links": {"ok": True, "fetched": 0, "accepted": 0},
+        },
+    }
+    companies = (company("Acme"), company("Beta"), company("Gamma"), company("Links", "link"))
+    block = listings_block([], status, settings(*companies))
+    assert "| Company | Platform | Open | Last read | Fetched |" in block
+    assert "| --- | --- | --- | --- | ---: |" in block
+    assert "| [Acme](https://acme.example) | greenhouse | 0 | ok | 202 |" in block
+    assert "| [Beta](https://acme.example) | greenhouse | 0 | failed | 0 |" in block
+    assert "| [Gamma](https://acme.example) | greenhouse | 0 | — | — |" in block
+    assert "| [Links](https://acme.example) | — | 0 | link only | — |" in block
