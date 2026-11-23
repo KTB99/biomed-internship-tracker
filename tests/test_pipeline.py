@@ -70,6 +70,21 @@ def test_refresh_writes_catalog_views_and_log(tmp_path):
     assert log[0]["title"] == "Sales Intern" and log[0]["reasons"] == ["non-STEM role"]
 
 
+def test_refresh_tidies_an_existing_listings_location(tmp_path):
+    messy = "New Kensington, Pennsylvania, United States, Pennsylvania, United States of America"
+    files = paths(tmp_path)
+    client, _ = fake_client(handler([greenhouse_job(1, "Software Engineering Intern", messy)]))
+    refresh(settings(GOOD), client, files, today="2026-11-01")
+    (row,) = json.loads(files.listings.read_text())
+    files.listings.write_text(json.dumps([{**row, "location": messy}]))  # written before tidying
+
+    refresh(settings(GOOD), client, files, today="2026-11-02")
+    (row,) = json.loads(files.listings.read_text())
+    assert row["location"] == "New Kensington, Pennsylvania, United States"
+    assert row["first_seen"] == "2026-11-01"
+    assert messy not in files.readme.read_text()
+
+
 def test_failed_company_keeps_its_listings(tmp_path):
     files = paths(tmp_path)
     client, _ = fake_client(handler([greenhouse_job(1, "Software Engineering Intern")]))

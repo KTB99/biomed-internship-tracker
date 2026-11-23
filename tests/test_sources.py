@@ -119,6 +119,7 @@ def test_eightfold_builds_urls_on_the_origin():
                 {
                     "id": 78,
                     "name": "Sneaky Intern",
+                    "standardizedLocations": ["Marlborough US-MA, United States | N/A"],
                     "positionUrl": "https://evil.example/phish",
                 },
             ],
@@ -137,7 +138,8 @@ def test_eightfold_builds_urls_on_the_origin():
     )
     by_id = {lead.external_id: lead for lead in leads}
     assert by_id["JR-1"].url == "https://careers.acme.example/careers/job/77"
-    assert by_id["JR-1"].locations == ["San Diego, CA, US", "US-CA"]
+    assert by_id["JR-1"].locations == ["San Diego, CA, US"]
+    assert by_id["78"].locations == ["Marlborough US-MA, United States | N/A"]
     assert by_id["78"].url == "https://careers.acme.example/careers/job/78"
     assert session.calls[0][2]["params"]["domain"] == "acme.com"
 

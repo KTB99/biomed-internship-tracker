@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import stat
 import tempfile
 from pathlib import Path
 
@@ -60,8 +61,18 @@ def dumps(listings: list[dict]) -> str:
     return json.dumps(ordered, indent=2, ensure_ascii=False) + "\n"
 
 
+def _current_umask() -> int:
+    mask = os.umask(0o022)
+    os.umask(mask)
+    return mask
+
+
 def write_all(files: dict[Path, str]) -> None:
-    """Write every file to a temporary sibling first, then swap them all in."""
+    """Write every file to a temporary sibling first, then swap them all in.
+
+    A rewritten file keeps its current mode; a new file gets 0666 under the umask.
+    """
+    new_file_mode = 0o666 & ~_current_umask()
     staged: list[tuple[str, Path]] = []
     try:
         for path, text in files.items():
@@ -71,6 +82,9 @@ def write_all(files: dict[Path, str]) -> None:
             with os.fdopen(handle, "w", encoding="utf-8", newline="\n") as stream:
                 stream.write(text)
             staged.append((temporary, path))
+            # mkstemp creates the staged file owner-only (0600).
+            target_mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else new_file_mode
+            os.chmod(temporary, target_mode)
         for temporary, path in staged:
             os.replace(temporary, path)
     finally:
