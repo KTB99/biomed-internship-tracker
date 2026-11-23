@@ -29,6 +29,14 @@ python -m tracker render --check
 - Never hand-edit `data/listings.json`, `data/status.json`, `CLOSED.md` or the
   generated block in `README.md`. Use `python -m tracker refresh`, `render` or
   `close`.
+- An empty read fails when the company has `EMPTY_READ_GUARD` open listings or
+  its last good read (`last_good_fetched` in `data/status.json`) fetched
+  `EMPTY_FETCH_GUARD` postings; both live in `tracker/pipeline.py`. If a board
+  really is empty, accept it with `python -m tracker reset-baseline "<company>"`
+  in a reviewed pull request, not by editing `status.json`. When you move a
+  company to a reader that fetches nothing (e.g. `careers_page`), run
+  `reset-baseline` for it in the same pull request, or its first empty read
+  fails every day.
 - Tests mock HTTP; never call live job boards from tests or CI.
 - Don't change `tracker/ids.py` without a migration: every listing ID would change.
 - New platforms must be added to `PLATFORMS`, the schema's `platform` enum and

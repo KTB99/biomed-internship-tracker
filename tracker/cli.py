@@ -9,7 +9,7 @@ from pathlib import Path
 from tracker import catalog
 from tracker.config import load_settings
 from tracker.http import Client
-from tracker.pipeline import Paths, load_status, outputs, refresh
+from tracker.pipeline import Paths, load_status, outputs, refresh, reset_baseline
 from tracker.reconcile import close_manually
 
 
@@ -30,6 +30,12 @@ def main(argv: list[str] | None = None) -> int:
     shut.add_argument("listing_id")
     shut.add_argument("--today", type=_iso_date, default=date.today().isoformat())
 
+    reset = commands.add_parser(
+        "reset-baseline",
+        help="forget a company's last good fetch count, so an empty read is accepted",
+    )
+    reset.add_argument("company", help="the company's name as in companies.toml")
+
     args = parser.parse_args(argv)
     settings = load_settings()
     paths = Paths.default()
@@ -38,6 +44,7 @@ def main(argv: list[str] | None = None) -> int:
         "validate": _validate,
         "render": _render,
         "close": _close,
+        "reset-baseline": _reset_baseline,
     }
     return handlers[args.command](args, settings, paths)
 
@@ -93,6 +100,14 @@ def _close(args, settings, paths) -> int:
     files = outputs(paths, settings, listings, load_status(paths.status))
     catalog.write_all({path: text for path, text in files.items() if path != paths.status})
     print(f"Closed {args.listing_id}")
+    return 0
+
+
+def _reset_baseline(args, settings, paths) -> int:
+    if not reset_baseline(paths.status, args.company):
+        print(f"No company named {args.company!r} in {paths.status.name}")
+        return 1
+    print(f"Reset the baseline of {args.company}; its next empty read will be accepted")
     return 0
 
 
