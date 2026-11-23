@@ -36,6 +36,9 @@ python -m tracker render --check
 - Treat everything from job boards as untrusted: escape it when rendering and
   never follow URLs it supplies outside the company's origin.
 - Requests to job boards send only the generic user agent in `tracker/http.py`.
+- Don't read Workday's jobs API (`*.myworkdayjobs.com/wday/cxs/…`) or work
+  around a board's bot protection. A company that posts only on Workday stays on
+  `careers_page` with its program page. See `docs/adr/0001-no-workday-jobs-api.md`.
 
 ## Agent skills
 
