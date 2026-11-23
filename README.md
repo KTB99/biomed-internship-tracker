@@ -186,6 +186,37 @@ Closed listings are in [CLOSED.md](CLOSED.md).
 
 <!-- listings:end -->
 
+## Add an internship
+
+Some tracked companies post their internships only on Workday, which the tracker
+can't read (Alcon, Globus Medical, Insulet, Medtronic, ResMed, Smith+Nephew and
+Tandem). If you find an open posting at one of them, anyone with a GitHub
+account can submit it with the
+[**Add internship**](https://github.com/KTB99/biomed-internship-tracker/issues/new?template=add-internship.yml)
+issue form.
+It asks for the company, title, Apply URL, location, term and, optionally, the
+date applications close.
+
+A maintainer reviews each submission and opens the Apply link to check that the
+posting is open. The command they run (below) also checks the link is on that
+company's own careers or Workday site and screens the posting like any other.
+An accepted posting is added in a pull request and listed once it merges. It
+closes when a maintainer closes it, or the day after its closing date if you
+gave one. If the tracker can read the company later, a posting it reads at the
+same Apply URL replaces the submitted one.
+
+Maintainers accept a submission with:
+
+```bash
+gh issue view <N> --json body -q .body | python -m tracker add --issue <N> -
+```
+
+It writes nothing and says why when it refuses one: the company accepts no
+submissions, the Apply URL isn't https on one of the company's `submit_hosts`
+in [`companies.toml`](companies.toml), a field is missing, the closing date is
+invalid or past, screening rejects the posting, or the tracker already has it.
+See [ADR 0002](docs/adr/0002-submitted-listings.md).
+
 ## How it works
 
 A scheduled GitHub Action runs `python -m tracker refresh` once a day. For each
@@ -256,6 +287,7 @@ python -m tracker validate
 python -m tracker refresh --dry-run   # live read, writes nothing
 python -m tracker render              # rebuild README.md and CLOSED.md
 python -m tracker close <listing-id>  # close a listing by hand
+python -m tracker add --issue <N> -   # accept an "Add internship" issue (body on stdin)
 python -m tracker reset-baseline "<company>"  # accept that a board is really empty
 ```
 

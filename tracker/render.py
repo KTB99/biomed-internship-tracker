@@ -253,7 +253,8 @@ def closed_page(listings: list[dict]) -> str:
         f"Postings that are no longer open, newest first ({len(closed)} total"
         + (f", showing {CLOSED_LIMIT}" if len(closed) > CLOSED_LIMIT else "")
         + "). `missing` means the posting disappeared from the company's job board; "
-        "`manual` means a maintainer closed it.",
+        "`manual` means a maintainer closed it; `deadline` means the closing date given when "
+        "the listing was submitted passed.",
         "",
     ]
     if not closed:

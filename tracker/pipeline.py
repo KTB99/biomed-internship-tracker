@@ -10,7 +10,7 @@ from tracker import catalog, render
 from tracker.config import ROOT, Settings
 from tracker.http import Client, SourceError
 from tracker.ids import listing_id
-from tracker.reconcile import CompanyRun, new_record, reconcile
+from tracker.reconcile import SUBMITTED, CompanyRun, new_record, reconcile
 from tracker.screen import screen
 from tracker.sources import fetch_leads
 from tracker.text import clean
@@ -81,20 +81,24 @@ def read_company(
 
     `open_listings` are the company's open catalog rows before this run, and
     `baseline` is its last good read that fetched something (None if none).
+    The guards count only listings that came from a read, not submitted ones.
     """
     if company.link_only:
-        return CompanyRun(company.name, ok=True), []
+        return CompanyRun(company.name, ok=True, reads_job_board=False), []
     try:
         leads = fetch_leads(client, company)
     except (SourceError, ValueError, KeyError, TypeError, AttributeError) as exc:
         return _failed(company, str(exc)), []
-    if not leads and len(open_listings) >= EMPTY_READ_GUARD:
+    read_listings = [row for row in open_listings if row["platform"] != SUBMITTED]
+    if not leads and len(read_listings) >= EMPTY_READ_GUARD:
         return _failed(
-            company, f"returned no postings while {len(open_listings)} listings are open"
+            company, f"returned no postings while {len(read_listings)} listings are open"
         ), []
     if not leads and baseline and baseline.fetched >= EMPTY_FETCH_GUARD:
         return _failed(company, f"returned no postings after {baseline.fetched} last time"), []
-    run = CompanyRun(company.name, ok=True, fetched=len(leads))
+    run = CompanyRun(
+        company.name, ok=True, fetched=len(leads), reads_job_board=company.reads_job_board
+    )
     rejected = []
     for lead in leads:
         verdict = screen(lead, year=settings.year)
@@ -115,7 +119,7 @@ def read_company(
             )
     # A reader can return one posting twice; if any copy passes screening, keep it.
     run.rejected_ids -= {record["id"] for record in run.accepted}
-    in_season = {row["id"] for row in open_listings if row["season"] == settings.season}
+    in_season = {row["id"] for row in read_listings if row["season"] == settings.season}
     if len(in_season) >= EMPTY_READ_GUARD and in_season <= run.rejected_ids:
         error = (
             f"screening rejected all {len(in_season)} open listings; treating as a changed response"

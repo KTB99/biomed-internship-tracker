@@ -46,6 +46,7 @@
         "phenom",
         "pinpoint",
         "smartrecruiters",
+        "submitted",
         "talentbrew"
       ]
     },
@@ -70,21 +71,31 @@
     "misses": { "type": "integer", "minimum": 0 },
     "last_missed": { "$ref": "#/$defs/optional_date" },
     "closed_on": { "$ref": "#/$defs/optional_date" },
-    "close_reason": { "enum": ["missing", "manual", null] }
+    "close_reason": { "enum": ["missing", "manual", "deadline", null] },
+    "closes_on": { "$ref": "#/$defs/optional_date" },
+    "submitted_in": { "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }] }
   },
-  "if": { "properties": { "status": { "const": "closed" } } },
-  "then": {
-    "properties": {
-      "closed_on": { "$ref": "#/$defs/date" },
-      "close_reason": { "enum": ["missing", "manual"] }
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "closed" } } },
+      "then": {
+        "properties": {
+          "closed_on": { "$ref": "#/$defs/date" },
+          "close_reason": { "enum": ["missing", "manual", "deadline"] }
+        }
+      },
+      "else": {
+        "properties": {
+          "closed_on": { "type": "null" },
+          "close_reason": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "platform": { "const": "submitted" } } },
+      "else": { "properties": { "closes_on": false, "submitted_in": false } }
     }
-  },
-  "else": {
-    "properties": {
-      "closed_on": { "type": "null" },
-      "close_reason": { "type": "null" }
-    }
-  },
+  ],
   "$defs": {
     "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
     "optional_date": {

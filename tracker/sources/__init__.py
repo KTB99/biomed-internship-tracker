@@ -2,6 +2,8 @@
 
 Adding a platform: write a module here, register it in PLATFORMS, add it to the
 `platform` enum in tracker/listing.schema.json, and test it with mocked HTTP.
+The record-only platform `submitted` is in the schema enum but not in PLATFORMS,
+since no reader fetches it (docs/adr/0002-submitted-listings.md).
 """
 
 from __future__ import annotations

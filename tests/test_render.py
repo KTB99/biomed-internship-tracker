@@ -1,6 +1,6 @@
 import pytest
 from conftest import company, settings
-from test_reconcile import record
+from test_reconcile import record, submitted
 
 from tracker.render import (
     APPLY_BUTTON,
@@ -80,6 +80,50 @@ def test_closed_page_lists_closed_rows():
     assert "(1 total)" in page
     assert "| Acme | Engineering Intern 1 |" in page
     assert "Engineering Intern 2" not in page
+
+
+def test_closed_page_explains_each_close_reason():
+    page = closed_page([])
+    assert "`missing` means" in page
+    assert "`manual` means" in page
+    assert "`deadline` means the closing date given when the listing was submitted passed" in page
+
+
+HOSTILE = {
+    "title": "Intern | [click](javascript:alert(1)) <script>x</script>",
+    "location": "Boston | <img src=x onerror=alert(1)>",
+}
+
+
+def test_submitted_rows_are_escaped_in_the_readme():
+    row = submitted(
+        "https://acme.example/jobs/1?a=1)[x](javascript:alert(1))",
+        company="Acme",
+        **HOSTILE,
+    )
+    javascript = submitted("javascript:alert(1)//https://acme.example/jobs/2", company="Acme")
+    status = {"last_run": "2026-11-02", "companies": {"Acme": {"ok": True}}}
+    block = listings_block([row, javascript], status, settings(company("Acme")))
+    line = next(text for text in block.splitlines() if "Intern \\|" in text)
+    assert line.count(" | ") == 4  # five cells: the title and location add no columns
+    assert "<script>" not in block and "<img" not in block
+    assert "\\[click\\]\\(javascript:alert\\(1\\)\\)" in line
+    assert "&lt;img src=x onerror=alert\\(1\\)&gt;" in line
+    target = "https://acme.example/jobs/1?a=1%29[x]%28javascript:alert%281%29%29"
+    assert f"| [![Apply]({APPLY_BUTTON})]({target}) |" in line
+    assert "| Acme | Quality Engineering Intern | Minneapolis, MN | — |" in block
+    assert "](javascript:" not in block
+
+
+def test_submitted_rows_are_escaped_on_the_closed_page():
+    row = submitted(
+        closes_on="2026-11-01", status="closed", closed_on="2026-11-02", close_reason="deadline"
+    )
+    row.update(HOSTILE)
+    line = next(text for text in closed_page([row]).splitlines() if "Intern \\|" in text)
+    assert line.count(" | ") == 6
+    assert "<script>" not in line and "<img" not in line
+    assert line.endswith("| 2026-11-02 | deadline |")
 
 
 @pytest.mark.parametrize(

@@ -13,7 +13,7 @@ authors = [{ name = "Kyle Burger" }]
 dependencies = ["requests>=2.31", "jsonschema>=4.10"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.6"]
+dev = ["pytest>=8", "ruff>=0.6", "pyyaml>=6"]
 
 [tool.setuptools.packages.find]
 include = ["tracker*"]

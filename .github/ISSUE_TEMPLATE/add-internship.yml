@@ -1,0 +1,73 @@
+name: Add internship
+description: Submit an internship posting at a company the tracker lists but can't read.
+title: "Add internship: "
+labels: [needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for a US STEM summer internship or co-op posted by a company
+        that is already listed in the tracker. The Company list shows the companies
+        that accept submissions: those that post only on a job board the tracker
+        can't read. A maintainer reviews each submission, opens the Apply link to
+        check that the posting is real and open, and adds it to the tracker.
+  # Options: every company in companies.toml with `submit_hosts`, in the same
+  # order. tests/test_issue_form.py fails when the two differ.
+  - type: dropdown
+    id: company
+    attributes:
+      label: Company
+      options:
+        - Alcon
+        - Globus Medical
+        - Insulet
+        - Medtronic
+        - ResMed
+        - Smith+Nephew
+        - Tandem
+    validations:
+      required: true
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: The posting's title, as the company writes it.
+      placeholder: Quality Engineering Intern
+    validations:
+      required: true
+  - type: input
+    id: apply_url
+    attributes:
+      label: Apply URL
+      description: >-
+        The posting's own page on the company's careers site or its Workday site
+        (https), not a search page or a link from another job site.
+      placeholder: https://medtronic.wd1.myworkdayjobs.com/MedtronicCareers/job/...
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: City and state.
+      placeholder: Minneapolis, MN
+    validations:
+      required: true
+  - type: input
+    id: term
+    attributes:
+      label: Term
+      description: When the internship runs.
+      placeholder: Summer 2027
+    validations:
+      required: true
+  - type: input
+    id: closes_on
+    attributes:
+      label: Closes on
+      description: >-
+        Optional. The date applications close, written YYYY-MM-DD. The listing is
+        closed after this date.
+      placeholder: "2027-01-31"
+    validations:
+      required: false

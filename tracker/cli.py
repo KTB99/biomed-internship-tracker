@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from datetime import date
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from tracker.config import load_settings
 from tracker.http import Client
 from tracker.pipeline import Paths, load_status, outputs, refresh, reset_baseline
 from tracker.reconcile import close_manually
+from tracker.submit import Refused, parse_form, submitted_listing
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -30,6 +32,13 @@ def main(argv: list[str] | None = None) -> int:
     shut.add_argument("listing_id")
     shut.add_argument("--today", type=_iso_date, default=date.today().isoformat())
 
+    add = commands.add_parser("add", help='add a listing from an "Add internship" issue')
+    add.add_argument("--issue", type=_issue_number, required=True, help="the issue's number")
+    add.add_argument(
+        "body", nargs="?", default="-", help="a file holding the issue body, or - for stdin"
+    )
+    add.add_argument("--today", type=_iso_date, default=date.today().isoformat())
+
     reset = commands.add_parser(
         "reset-baseline",
         help="forget a company's last good fetch count, so an empty read is accepted",
@@ -44,6 +53,7 @@ def main(argv: list[str] | None = None) -> int:
         "validate": _validate,
         "render": _render,
         "close": _close,
+        "add": _add,
         "reset-baseline": _reset_baseline,
     }
     return handlers[args.command](args, settings, paths)
@@ -103,6 +113,24 @@ def _close(args, settings, paths) -> int:
     return 0
 
 
+def _add(args, settings, paths) -> int:
+    body = sys.stdin.read() if args.body == "-" else Path(args.body).read_text(encoding="utf-8")
+    listings = catalog.load(paths.listings)
+    try:
+        record = submitted_listing(
+            parse_form(body), listings, settings, issue=args.issue, today=args.today
+        )
+    except Refused as refusal:
+        print(f"Refused issue #{args.issue}: {refusal}")
+        return 1
+    listings = [*listings, record]
+    catalog.check(listings)
+    files = outputs(paths, settings, listings, load_status(paths.status))
+    catalog.write_all({path: text for path, text in files.items() if path != paths.status})
+    print(f"Added {record['id']} from issue #{args.issue}")
+    return 0
+
+
 def _reset_baseline(args, settings, paths) -> int:
     if not reset_baseline(paths.status, args.company):
         print(f"No company named {args.company!r} in {paths.status.name}")
@@ -117,3 +145,10 @@ def _read(path: Path) -> str | None:
 
 def _iso_date(value: str) -> str:
     return date.fromisoformat(value).isoformat()
+
+
+def _issue_number(value: str) -> int:
+    number = int(value)
+    if number < 1:
+        raise argparse.ArgumentTypeError("an issue number is 1 or more")
+    return number
