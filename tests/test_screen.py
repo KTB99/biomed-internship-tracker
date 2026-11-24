@@ -60,6 +60,11 @@ def test_us_location(location, expected):
         "IT Intern",
         "Summer Co-op, Mechanical Engineering",
         "BS/MS/PhD Research Intern",
+        # Title shapes from Neuralink, Axogen and AtriCure's boards.
+        "Neuroengineer Intern",
+        "Mechanical Engineering Intern, Brain Interfaces",
+        "Intern, New Product Development (R&D)",
+        "Sourcing Project Engineer Co-op (Summer 2027)",
     ],
 )
 def test_accepts_stem_summer_internships(title):
@@ -81,6 +86,7 @@ def test_accepts_stem_summer_internships(title):
         (lead("Engineering Intern", locations=["Remote"]), "no US location"),
         (lead("Engineering Intern - Summer 2026"), "term year 2026 is not 2027"),
         (lead("Fall 2027 Engineering Intern"), "not a summer term"),
+        (lead("Engineering Co-op Spring 2027"), "not a summer term"),
         (lead("Engineering Co-op"), "co-op with no summer term"),
         (lead("PhD Research Intern"), "PhD-only title"),
         (

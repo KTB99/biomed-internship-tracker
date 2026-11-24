@@ -86,12 +86,14 @@ def listings_block(listings: list[dict], status: dict, settings: Settings) -> st
     ]
     companies = {row["company"] for row in current}
     today = status.get("last_run")
+    rolling = {company.name for company in settings.companies if company.rolling}
     sections = []
     for family, heading in SECTIONS:
         rows = [row for row in current if row["family"] == family]
         if rows:
             rows.sort(key=lambda row: (row["company"].lower(), row["title"].lower(), row["id"]))
-            rows.sort(key=_since, reverse=True)  # stable: ties keep the order above
+            # stable: ties keep the order above
+            rows.sort(key=lambda row: _since(row, rolling), reverse=True)
             sections.append((heading, rows))
 
     programs = program_pages(current, settings)
@@ -123,7 +125,7 @@ def listings_block(listings: list[dict], status: dict, settings: Settings) -> st
         lines += [
             f"| {cell(row['company'])} | {role_cell(row['title'], notes.get(row['company']))} | "
             f"{location_cell(row['location'])} | {apply_button(row['url'])} | "
-            f"{age(_since(row), today)} |"
+            f"{_age_cell(row, rolling, today)} |"
             for row in rows
         ]
         lines.append("")
@@ -241,7 +243,14 @@ def _company_table(listings: list[dict], status: dict, settings: Settings) -> li
     return lines
 
 
-def _since(row: dict) -> str:
+def _age_cell(row: dict, rolling: set[str], today: str | None) -> str:
+    return "rolling" if row["company"] in rolling else age(_since(row, rolling), today)
+
+
+def _since(row: dict, rolling: set[str]) -> str:
+    """The date a row's age counts from: a rolling company's posted date is meaningless."""
+    if row["company"] in rolling:
+        return row["first_seen"]
     return row["posted_on"] or row["first_seen"]
 
 

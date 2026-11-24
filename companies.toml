@@ -14,6 +14,10 @@
 # `note` (optional) is a short line shown in small text under the company's role
 # and program titles in the README, for something every listing there shares.
 #
+# `rolling = true` (optional) is for a company whose postings name no term and
+# stay open year-round: the README shows "rolling" in the Age column instead of
+# an age counted from a posted date that says nothing about the season.
+#
 # `submit_hosts` (optional) lists the hosts an Apply URL may use when someone
 # submits a posting for the company by hand. The URL must be https and its host
 # must equal one entry exactly: no subdomains or wildcards. A company without
@@ -49,6 +53,20 @@ platform = "jobs2web"
 careers_url = "https://careers.arthrex.com"
 params = { origin = "https://careers.arthrex.com" }
 program = { label = "Internships", url = "https://careers.arthrex.com/NorthAmerica/content/Arthrex-Internships/?locale=en_US", location = "Naples, FL" }
+
+[[companies]]
+name = "AtriCure"
+platform = "greenhouse"
+careers_url = "https://job-boards.greenhouse.io/atricure"
+params = { board = "atricure" }
+program = { label = "Student opportunities", url = "https://www.atricure.com/careers-atricure/student-opportunities", location = "Mason, OH" }
+
+[[companies]]
+name = "Axogen"
+platform = "greenhouse"
+careers_url = "https://www.axogeninc.com/about-axogen/careers/"
+params = { board = "axogen" }
+program = { label = "Careers", url = "https://www.axogeninc.com/about-axogen/careers/", location = "Alachua, FL" }
 
 [[companies]]
 name = "Baxter"
@@ -174,6 +192,18 @@ careers_url = "https://www.medtronic.com/en-us/our-company/careers.html"
 params = { page = "https://www.medtronic.com/en-us/our-company/careers/early-careers.html" }
 program = { label = "Early careers", url = "https://www.medtronic.com/en-us/our-company/careers/early-careers.html", location = "Minneapolis, MN" }
 submit_hosts = ["medtronic.wd1.myworkdayjobs.com", "www.medtronic.com"]
+
+# Neuralink's internship postings name no year or season and stay open for
+# a long time (on 2026-11-24, first-published dates ran from 2024 to 2026), so
+# the screen accepts them as untermed and the company is `rolling`.
+[[companies]]
+name = "Neuralink"
+platform = "greenhouse"
+careers_url = "https://neuralink.com/careers/"
+params = { board = "neuralink" }
+program = { label = "Open roles", url = "https://neuralink.com/careers/", location = "Fremont, CA" }
+note = "Open year-round. Check the posting for start dates."
+rolling = true
 
 # NIH's internship programs are not job postings: students apply once through
 # NIH's Application Center, so there is nothing to read and NIH is link-only.
