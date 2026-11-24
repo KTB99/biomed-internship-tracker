@@ -9,8 +9,9 @@ body:
         Use this form for a US STEM summer internship or co-op posted by a company
         that is already listed in the tracker. The Company list shows the companies
         that accept submissions: those that post only on a job board the tracker
-        can't read. A maintainer reviews each submission, opens the Apply link to
-        check that the posting is real and open, and adds it to the tracker.
+        can't read, and NIH programs that publish no postings it can read. A
+        maintainer reviews each submission, opens the Apply link to check that the
+        posting is real and open, and adds it to the tracker.
   # Options: every company in companies.toml with `submit_hosts`, in the same
   # order. tests/test_issue_form.py fails when the two differ.
   - type: dropdown
@@ -22,6 +23,7 @@ body:
         - Globus Medical
         - Insulet
         - Medtronic
+        - NIH NIBIB
         - ResMed
         - Smith+Nephew
         - Tandem

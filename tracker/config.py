@@ -40,6 +40,8 @@ class Company:
     params: dict = field(default_factory=dict)
     program: Program | None = None
     submit_hosts: tuple[str, ...] = ()
+    # A short line shown under the company's role and program titles in the README.
+    note: str = ""
 
     @property
     def link_only(self) -> bool:
@@ -97,6 +99,7 @@ def load_settings(path: Path = REGISTRY_PATH) -> Settings:
             params=dict(entry.get("params", {})),
             program=_program(entry),
             submit_hosts=_submit_hosts(entry),
+            note=_note(entry),
         )
         if not company.name:
             raise ValueError("company name must not be empty")
@@ -123,6 +126,13 @@ def _submit_hosts(entry: dict) -> tuple[str, ...]:
                 f"{name}: submit_hosts entry {host!r} must be a bare lowercase hostname"
             )
     return tuple(raw)
+
+
+def _note(entry: dict) -> str:
+    raw = entry.get("note", "")
+    if not isinstance(raw, str):
+        raise ValueError(f"{str(entry['name']).strip()}: note must be text")
+    return raw.strip()
 
 
 def _program(entry: dict) -> Program | None:

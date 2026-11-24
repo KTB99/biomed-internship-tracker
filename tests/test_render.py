@@ -1,7 +1,10 @@
+from dataclasses import replace
+
 import pytest
 from conftest import company, settings
 from test_reconcile import record, submitted
 
+from tracker.config import Program
 from tracker.render import (
     APPLY_BUTTON,
     END_MARKER,
@@ -183,3 +186,25 @@ def test_company_table_shows_each_reads_fetched_count():
     assert "| [Beta](https://acme.example) | greenhouse | 0 | failed | 0 |" in block
     assert "| [Gamma](https://acme.example) | greenhouse | 0 | — | — |" in block
     assert "| [Links](https://acme.example) | — | 0 | link only | — |" in block
+
+
+def test_a_company_note_shows_under_its_listing_titles():
+    noted = replace(company("Acme"), note="Apply once | <b>all labs</b>")
+    status = {"last_run": "2026-11-02", "companies": {}}
+    block = listings_block([record("1", title="Lab Intern")], status, settings(noted))
+    note = "<br><sub>Apply once \\| &lt;b&gt;all labs&lt;/b&gt;</sub>"
+    assert f"| Acme | Lab Intern{note} | Irvine, CA, US |" in block
+
+
+def test_a_company_note_shows_under_its_program_page():
+    program = Program(label="Summer program", url="https://acme.example/sip", location="")
+    noted = replace(company("Acme"), program=program, note="Apply once")
+    block = listings_block([], {"last_run": "2026-11-02", "companies": {}}, settings(noted))
+    assert "| Acme | Summer program<br><sub>Apply once</sub> |" in block
+
+
+def test_a_role_without_a_note_has_no_subtext():
+    status = {"last_run": "2026-11-02", "companies": {}}
+    block = listings_block([record("1", title="Lab Intern")], status, settings(company("Acme")))
+    assert "| Acme | Lab Intern | Irvine, CA, US |" in block
+    assert "<sub>" not in block
