@@ -65,6 +65,21 @@ def test_submit_hosts_must_be_a_list(tmp_path):
         load_company(tmp_path, 'submit_hosts = "acme.wd5.myworkdayjobs.com"\n')
 
 
+def test_a_note_loads_from_the_registry(tmp_path):
+    company = load_company(tmp_path, 'note = "  One application covers every lab.  "\n')
+
+    assert company.note == "One application covers every lab."
+
+
+def test_a_note_defaults_to_empty(tmp_path):
+    assert load_company(tmp_path).note == ""
+
+
+def test_a_note_must_be_text(tmp_path):
+    with pytest.raises(ValueError, match="Acme Medical"):
+        load_company(tmp_path, "note = 5\n")
+
+
 MEDTRONIC_HOST = "medtronic.wd1.myworkdayjobs.com"
 POSTING = "/en-US/MedtronicCareers/job/Minneapolis/Engineering-Intern_R12345"
 

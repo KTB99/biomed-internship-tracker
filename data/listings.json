@@ -456,6 +456,27 @@
     "close_reason": null
   },
   {
+    "id": "0a52269a-47ce-5267-9800-9b245b81200c",
+    "company": "NIH NIBIB",
+    "title": "Biomedical Engineering Summer Internship Program (BESIP)",
+    "location": "Bethesda, MD, US",
+    "url": "https://www.nibib.nih.gov/labs-at-nibib/besip",
+    "platform": "submitted",
+    "external_id": "https://www.nibib.nih.gov/labs-at-nibib/besip",
+    "family": "R&D & Biomedical",
+    "season": "summer-2027",
+    "posted_on": null,
+    "first_seen": "2026-11-24",
+    "last_seen": "2026-11-24",
+    "status": "open",
+    "misses": 0,
+    "last_missed": null,
+    "closed_on": null,
+    "close_reason": null,
+    "closes_on": "2027-01-26",
+    "submitted_in": 23
+  },
+  {
     "id": "e9651e69-3ea7-539c-928f-f2aa62f8cd48",
     "company": "Philips",
     "title": "Intern - Product Investigations Lab - New Kensington, PA - Summer 2027",
