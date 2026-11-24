@@ -208,3 +208,25 @@ def test_a_role_without_a_note_has_no_subtext():
     block = listings_block([record("1", title="Lab Intern")], status, settings(company("Acme")))
     assert "| Acme | Lab Intern | Irvine, CA, US |" in block
     assert "<sub>" not in block
+
+
+def test_a_rolling_company_shows_rolling_instead_of_an_age():
+    rolling = replace(company("Acme"), rolling=True)
+    row = record("1", title="Neuro Intern", posted_on="2024-06-13", first_seen="2026-11-02")
+    block = listings_block([row], {"last_run": "2026-11-02", "companies": {}}, settings(rolling))
+    assert "| Acme | Neuro Intern | Irvine, CA, US |" in block
+    assert block.count(" | rolling |") == 1
+    assert "2y" not in block and "mo |" not in block
+
+
+def test_rolling_listings_sort_by_when_the_tracker_first_saw_them():
+    rolling = replace(company("Acme"), rolling=True)
+    old_posting = record(
+        "1", company="Acme", title="Rolling Intern", posted_on="2024-06-13", first_seen="2026-11-02"
+    )
+    dated = record(
+        "2", company="Beta", title="Dated Intern", posted_on="2026-10-01", first_seen="2026-10-01"
+    )
+    status = {"last_run": "2026-11-02", "companies": {}}
+    block = listings_block([dated, old_posting], status, settings(rolling, company("Beta")))
+    assert block.index("Rolling Intern") < block.index("Dated Intern")

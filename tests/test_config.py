@@ -80,6 +80,19 @@ def test_a_note_must_be_text(tmp_path):
         load_company(tmp_path, "note = 5\n")
 
 
+def test_rolling_loads_from_the_registry(tmp_path):
+    assert load_company(tmp_path, "rolling = true\n").rolling is True
+
+
+def test_rolling_defaults_to_false(tmp_path):
+    assert load_company(tmp_path).rolling is False
+
+
+def test_rolling_must_be_true_or_false(tmp_path):
+    with pytest.raises(ValueError, match="Acme Medical"):
+        load_company(tmp_path, 'rolling = "yes"\n')
+
+
 MEDTRONIC_HOST = "medtronic.wd1.myworkdayjobs.com"
 POSTING = "/en-US/MedtronicCareers/job/Minneapolis/Engineering-Intern_R12345"
 

@@ -42,6 +42,9 @@ class Company:
     submit_hosts: tuple[str, ...] = ()
     # A short line shown under the company's role and program titles in the README.
     note: str = ""
+    # Postings stay open year-round and name no term, so their posted date
+    # says nothing about this season: the README shows "rolling" for their age.
+    rolling: bool = False
 
     @property
     def link_only(self) -> bool:
@@ -100,6 +103,7 @@ def load_settings(path: Path = REGISTRY_PATH) -> Settings:
             program=_program(entry),
             submit_hosts=_submit_hosts(entry),
             note=_note(entry),
+            rolling=_rolling(entry),
         )
         if not company.name:
             raise ValueError("company name must not be empty")
@@ -133,6 +137,13 @@ def _note(entry: dict) -> str:
     if not isinstance(raw, str):
         raise ValueError(f"{str(entry['name']).strip()}: note must be text")
     return raw.strip()
+
+
+def _rolling(entry: dict) -> bool:
+    raw = entry.get("rolling", False)
+    if not isinstance(raw, bool):
+        raise ValueError(f"{str(entry['name']).strip()}: rolling must be true or false")
+    return raw
 
 
 def _program(entry: dict) -> Program | None:
