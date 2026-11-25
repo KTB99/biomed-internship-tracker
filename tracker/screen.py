@@ -60,7 +60,10 @@ FAMILY_RULES: tuple[tuple[str, re.Pattern], ...] = (
         re.compile(
             r"r\s?&\s?d|research|biomedical|bioengineer|biolog|chemi|scien|laborator|\blab\b|"
             r"material|optic|imaging|product development|systems engineer|test engineer|"
-            r"design engineer",
+            r"design engineer|translational|informatics|toxicolog|pharmaco|pharmaceutic|"
+            r"patholog|genom|\bgene(?:s|tic)?\b|immunolog|oncolog|inflammation|antibod|"
+            r"protein|\bcells?\b|in vivo|in vitro|spectromet|computational|discovery|"
+            r"\bdrug\b|formulation|analytical|bioprocess|biologics|vaccine",
             re.IGNORECASE,
         ),
     ),
@@ -74,8 +77,9 @@ _GENERAL_STEM = re.compile(r"engineer|technical|technolog|\bstem\b|physics|mathe
 _IT = re.compile(r"\bIT\b")
 _NON_STEM = re.compile(
     r"financ|accounting|accountant|\baudit|\btax\b|treasury|marketing|\bsales\b|commercial|"
-    r"business development|\bbrand|human resources|\bhr\b|\bpeople\b|talent|recruit|"
-    r"communications|public relations|\blegal\b|paralegal|procurement|purchasing|"
+    r"business development|\bbrand|human resources|\bhr\b|\bpeople\b|"
+    r"talent (?:acquisition|management)|recruit|"
+    r"communications|public relations|\blegal\b|\blaw\b|paralegal|procurement|purchasing|"
     r"customer (?:service|experience)|graphic design|social media",
     re.IGNORECASE,
 )
@@ -181,7 +185,8 @@ def _season_problem(lead: Lead, year: int) -> str | None:
     years = {int(found) for found in _YEAR.findall(text)}
     if years and year not in years:
         return f"term year {', '.join(str(y) for y in sorted(years))} is not {year}"
-    if _OFF_SEASON.search(text):
+    # "Spring and Summer" or "Summer/Fall" still covers the summer.
+    if _OFF_SEASON.search(text) and not _SUMMER.search(text):
         return "not a summer term"
     if (
         _CO_OP.search(lead.title)

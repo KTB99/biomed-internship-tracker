@@ -65,6 +65,14 @@ def test_us_location(location, expected):
         "Mechanical Engineering Intern, Brain Interfaces",
         "Intern, New Product Development (R&D)",
         "Sourcing Project Engineer Co-op (Summer 2027)",
+        # Pharma title shapes from Genentech, Amgen, Takeda and Merck.
+        "2027 Summer Intern - Translational Safety (Computational Toxicology)",
+        "Grad Intern - Inflammation (Summer 2027)",
+        "Grad Intern – Mass Spectrometry (Summer 2027)",
+        "2027 Summer Internship Program: Population PK Pharmacometrics Intern",
+        "2027 Future Talent Program - Discovery Chemistry & Process Research - Intern",
+        # A co-op spanning spring and summer still covers the summer.
+        "2027 Spring and Summer Co-Op, Packaging Engineering",
     ],
 )
 def test_accepts_stem_summer_internships(title):
@@ -81,6 +89,8 @@ def test_accepts_stem_summer_internships(title):
             "title is a SkillBridge placement",
         ),
         (lead("Marketing Intern"), "non-STEM role"),
+        (lead("Talent Acquisition Intern"), "non-STEM role"),
+        (lead("2027 Summer Law Intern - Data Privacy"), "non-STEM role"),
         (lead("Finance Data Intern"), "non-STEM role"),
         (lead("Summer Intern"), "no STEM evidence in title or department"),
         (lead("Engineering Intern", locations=["Remote"]), "no US location"),

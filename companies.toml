@@ -6,8 +6,8 @@
 # whenever the company has no open postings we can read.
 #
 # platform = "link" means no automated reader: only the program page is shown
-# (currently J&J MedTech, whose site refuses automated requests, and NIH's
-# programs, which publish no postings to read).
+# (currently J&J, Medline and Vertex, whose sites refuse automated requests, and
+# NIH's programs, which publish no postings to read).
 # `search_terms` (optional, in params) replaces the default terms
 # ("intern", "internship", "co-op") on search-based platforms.
 #
@@ -33,6 +33,13 @@ params = { origin = "https://www.jobs.abbott" }
 program = { label = "University internship program", url = "https://www.jobs.abbott/us/en/university-internship-program", location = "Abbott Park, IL" }
 
 [[companies]]
+name = "AbbVie"
+platform = "attrax"
+careers_url = "https://careers.abbvie.com/en"
+params = { origin = "https://careers.abbvie.com" }
+program = { label = "Internship search", url = "https://careers.abbvie.com/en/jobs?q=intern", location = "North Chicago, IL" }
+
+[[companies]]
 name = "Alcon"
 platform = "careers_page"
 careers_url = "https://www.alcon.com/careers/"
@@ -48,11 +55,26 @@ params = { jobs_url = "https://jobs.aligntech.com/jobs.json" }
 program = { label = "Careers and internships", url = "https://jobs.aligntech.com/careers", location = "Tempe, AZ" }
 
 [[companies]]
+name = "Amgen"
+platform = "talentbrew"
+careers_url = "https://careers.amgen.com/en"
+params = { origin = "https://careers.amgen.com" }
+program = { label = "Students and graduates", url = "https://careers.amgen.com/en/students-graduates", location = "Thousand Oaks, CA" }
+
+[[companies]]
 name = "Arthrex"
 platform = "jobs2web"
 careers_url = "https://careers.arthrex.com"
 params = { origin = "https://careers.arthrex.com" }
 program = { label = "Internships", url = "https://careers.arthrex.com/NorthAmerica/content/Arthrex-Internships/?locale=en_US", location = "Naples, FL" }
+
+# AstraZeneca's TalentBrew site serves search results without the /en prefix.
+[[companies]]
+name = "AstraZeneca"
+platform = "talentbrew"
+careers_url = "https://careers.astrazeneca.com"
+params = { origin = "https://careers.astrazeneca.com", results_path = "/search-jobs/results" }
+program = { label = "Early talent", url = "https://careers.astrazeneca.com/early-talent", location = "Wilmington, DE" }
 
 [[companies]]
 name = "AtriCure"
@@ -75,6 +97,14 @@ careers_url = "https://jobs.baxter.com"
 params = { origin = "https://jobs.baxter.com" }
 program = { label = "Internships and co-ops", url = "https://jobs.baxter.com/en/category/intern-jobs/152/83228/1", location = "Deerfield, IL" }
 
+# Bayer's careers site is a Paradox site; its own search page links to Workday.
+[[companies]]
+name = "Bayer"
+platform = "paradox"
+careers_url = "https://jobs.bayer.com"
+params = { origin = "https://jobs.bayer.com" }
+program = { label = "Careers", url = "https://jobs.bayer.com/", location = "Whippany, NJ" }
+
 [[companies]]
 name = "BD"
 platform = "talentbrew"
@@ -90,11 +120,26 @@ params = { page = "https://www.biotronik.com/en-us/careers/career-levels/student
 program = { label = "Student opportunities", url = "https://www.biotronik.com/en-us/careers/career-levels/students", location = "Lake Oswego, OR" }
 
 [[companies]]
+name = "Boehringer Ingelheim"
+platform = "jobs2web"
+careers_url = "https://jobs.boehringer-ingelheim.com"
+params = { origin = "https://jobs.boehringer-ingelheim.com" }
+program = { label = "Students and graduates", url = "https://www.boehringer-ingelheim.com/us/careers/students-and-graduates", location = "Ridgefield, CT" }
+
+[[companies]]
 name = "Boston Scientific"
 platform = "eightfold"
 careers_url = "https://bostonscientific.eightfold.ai/careers"
 params = { origin = "https://bostonscientific.eightfold.ai", domain = "bostonscientific.com" }
 program = { label = "Student opportunities", url = "https://www.bostonscientific.com/en-US/careers/students.html", location = "Marlborough, MA" }
+
+# BMS's careers site (jobs.bms.com) applies on Workday; its search runs on Eightfold.
+[[companies]]
+name = "Bristol Myers Squibb"
+platform = "eightfold"
+careers_url = "https://careers.bms.com"
+params = { origin = "https://bms.eightfold.ai", domain = "bms.com" }
+program = { label = "Internships and co-ops", url = "https://careers.bms.com/internships-co-ops/", location = "Princeton, NJ" }
 
 [[companies]]
 name = "CONMED"
@@ -127,12 +172,36 @@ careers_url = "https://www.edwards.com/careers"
 params = { app_id = "LTJQZME6D2", search_key = "beb9bc9bce9e8a52bd34aec0c2b4a599", index = "EdwardsCareersJobs", referer = "https://www.edwards.com/careers/jobsearch" }
 program ={ label = "Internship programs", url = "https://www.edwards.com/careers/university-recruiting/internship-programs", location = "Irvine, CA" }
 
+# The EMD Group (Merck KGaA, Darmstadt) is EMD Serono and MilliporeSigma in the US.
+[[companies]]
+name = "EMD Group"
+platform = "phenom"
+careers_url = "https://careers.emdgroup.com/us/en"
+params = { origin = "https://careers.emdgroup.com" }
+program = { label = "Students and graduates", url = "https://careers.emdgroup.com/us/en/students-and-graduates", location = "Burlington, MA" }
+
 [[companies]]
 name = "GE HealthCare"
 platform = "phenom"
 careers_url = "https://careers.gehealthcare.com"
 params = { origin = "https://careers.gehealthcare.com" }
 program = { label = "Internships", url = "https://careers.gehealthcare.com/global/en/internship", location = "Chicago, IL" }
+
+# Genentech is Roche's US pharma arm with its own Phenom site; the Roche entry
+# reads Roche's global site, where Roche Diagnostics posts its US roles.
+[[companies]]
+name = "Genentech"
+platform = "phenom"
+careers_url = "https://careers.gene.com/us/en"
+params = { origin = "https://careers.gene.com" }
+program = { label = "Internships", url = "https://careers.gene.com/us/en/internships", location = "South San Francisco, CA" }
+
+[[companies]]
+name = "Gilead"
+platform = "careers_page"
+careers_url = "https://www.gilead.com/careers"
+params = { page = "https://www.gilead.com/careers/opportunities/early-career-opportunities/gilead-internship-program" }
+program = { label = "Internship program", url = "https://www.gilead.com/careers/opportunities/early-career-opportunities/gilead-internship-program", location = "Foster City, CA" }
 
 [[companies]]
 name = "Globus Medical"
@@ -141,6 +210,20 @@ careers_url = "https://www.globusmedical.com/about/careers/"
 params = { page = "https://www.globusmedical.com/about/careers/" }
 program = { label = "Co-op program", url = "https://www.globusmedical.com/about/careers/", location = "Audubon, PA" }
 submit_hosts = ["globusmedical.wd5.myworkdayjobs.com", "www.globusmedical.com"]
+
+[[companies]]
+name = "GSK"
+platform = "phenom"
+careers_url = "https://jobs.gsk.com/us/en"
+params = { origin = "https://jobs.gsk.com" }
+program = { label = "Early talent", url = "https://www.gsk.com/en-gb/careers/early-talent/", location = "Philadelphia, PA" }
+
+[[companies]]
+name = "Haleon"
+platform = "eightfold"
+careers_url = "https://careers.haleon.com/careers"
+params = { origin = "https://careers.haleon.com", domain = "haleon.com" }
+program = { label = "Early careers", url = "https://careers.haleon.com/careers/early-careers", location = "Warren, NJ" }
 
 [[companies]]
 name = "Hologic"
@@ -178,12 +261,39 @@ careers_url = "https://careers.intuitive.com"
 params = { company_id = "Intuitive" }
 program = { label = "Students and university", url = "https://careers.intuitive.com/en/career-opportunities/students-and-university/", location = "Sunnyvale, CA" }
 
-# J&J's careers site refuses automated requests (HTTP 403), so it is link-only.
+# J&J's careers site refuses automated requests from a maintainer's cloud server
+# (HTTP 403). GitHub's runners can load it, but its server ignores the keyword
+# and every filter (the browser filters through an internal API), so it is
+# link-only.
 [[companies]]
-name = "J&J MedTech"
+name = "Johnson & Johnson"
 platform = "link"
 careers_url = "https://www.careers.jnj.com"
 program = { label = "Early career internships", url = "https://www.careers.jnj.com/en/early-career-programs/internships/", location = "New Brunswick, NJ" }
+
+[[companies]]
+name = "Kenvue"
+platform = "careers_page"
+careers_url = "https://jobs.kenvue.com"
+params = { page = "https://jobs.kenvue.com/students-and-graduates" }
+program = { label = "Students and graduates", url = "https://jobs.kenvue.com/students-and-graduates", location = "Summit, NJ" }
+
+# careers.lilly.com refuses requests from a maintainer's cloud server (HTTP 403)
+# but GitHub's runners read it with the tracker's client on 2026-11-25.
+[[companies]]
+name = "Lilly"
+platform = "phenom"
+careers_url = "https://careers.lilly.com/us/en"
+params = { origin = "https://careers.lilly.com" }
+program = { label = "Careers", url = "https://careers.lilly.com/us/en", location = "Indianapolis, IN" }
+
+# Medline's careers site refuses automated requests (HTTP 403), also from
+# GitHub's runners on 2026-11-25, so it is link-only.
+[[companies]]
+name = "Medline"
+platform = "link"
+careers_url = "https://www.medline.com/careers/"
+program = { label = "Careers", url = "https://www.medline.com/careers/", location = "Northfield, IL" }
 
 [[companies]]
 name = "Medtronic"
@@ -192,6 +302,14 @@ careers_url = "https://www.medtronic.com/en-us/our-company/careers.html"
 params = { page = "https://www.medtronic.com/en-us/our-company/careers/early-careers.html" }
 program = { label = "Early careers", url = "https://www.medtronic.com/en-us/our-company/careers/early-careers.html", location = "Minneapolis, MN" }
 submit_hosts = ["medtronic.wd1.myworkdayjobs.com", "www.medtronic.com"]
+
+# Merck & Co. (MSD outside the US and Canada).
+[[companies]]
+name = "Merck"
+platform = "phenom"
+careers_url = "https://jobs.merck.com/us/en"
+params = { origin = "https://jobs.merck.com" }
+program = { label = "Student opportunities", url = "https://jobs.merck.com/us/en/student-opportunities", location = "Rahway, NJ" }
 
 # Neuralink's internship postings name no year or season and stay open for
 # a long time (on 2026-11-24, first-published dates ran from 2024 to 2026), so
@@ -229,6 +347,20 @@ note = "One application for the whole program, not per position: choose NIBIB-BE
 submit_hosts = ["www.nibib.nih.gov"]
 
 [[companies]]
+name = "Novartis"
+platform = "careers_page"
+careers_url = "https://www.novartis.com/careers"
+params = { page = "https://www.novartis.com/careers/early-careers/us-biomedical-research-internship-programs" }
+program = { label = "US biomedical research internships", url = "https://www.novartis.com/careers/early-careers/us-biomedical-research-internship-programs", location = "East Hanover, NJ" }
+
+[[companies]]
+name = "Novo Nordisk"
+platform = "jobs2web"
+careers_url = "https://careers.novonordisk.com"
+params = { origin = "https://careers.novonordisk.com" }
+program = { label = "US careers", url = "https://www.novonordisk-us.com/careers.html", location = "Plainsboro, NJ" }
+
+[[companies]]
 name = "Olympus"
 platform = "jobs2web"
 careers_url = "https://careers.olympusamerica.com"
@@ -243,11 +375,27 @@ params = { site = "penumbrainc" }
 program = { label = "Open roles", url = "https://jobs.lever.co/penumbrainc", location = "Alameda, CA" }
 
 [[companies]]
+name = "Pfizer"
+platform = "careers_page"
+careers_url = "https://www.pfizer.com/about/careers"
+params = { page = "https://www.pfizer.com/en/early-careers" }
+program = { label = "Early careers", url = "https://www.pfizer.com/en/early-careers", location = "New York, NY" }
+
+[[companies]]
 name = "Philips"
 platform = "phenom"
 careers_url = "https://www.careers.philips.com"
 params = { origin = "https://www.careers.philips.com" }
 program = { label = "Internships", url = "https://www.careers.philips.com/student/na/en/internships-apprenticeship", location = "Cambridge, MA" }
+
+# careers.regeneron.com refuses requests from a maintainer's cloud server (HTTP
+# 403) but GitHub's runners read it with the tracker's client on 2026-11-25.
+[[companies]]
+name = "Regeneron"
+platform = "happydance"
+careers_url = "https://careers.regeneron.com/en/"
+params = { origin = "https://careers.regeneron.com" }
+program = { label = "Internship search", url = "https://careers.regeneron.com/en/jobs/?search=intern", location = "Tarrytown, NY" }
 
 [[companies]]
 name = "ResMed"
@@ -256,6 +404,23 @@ careers_url = "https://careers.resmed.com"
 params = { page = "https://careers.resmed.com/careers/early-careers/" }
 program = { label = "Early careers", url = "https://careers.resmed.com/careers/early-careers/", location = "San Diego, CA" }
 submit_hosts = ["resmed.wd3.myworkdayjobs.com", "careers.resmed.com"]
+
+# Roche's global site; Genentech has its own entry.
+[[companies]]
+name = "Roche"
+platform = "phenom"
+careers_url = "https://careers.roche.com/global/en"
+params = { origin = "https://careers.roche.com" }
+program = { label = "Student and graduate programs", url = "https://careers.roche.com/global/en/student-and-graduate-programs", location = "Indianapolis, IN" }
+
+# Sanofi's TalentBrew cards put a category ("Human Resources") inside the job
+# link, so the reader takes the title from the card's heading.
+[[companies]]
+name = "Sanofi"
+platform = "talentbrew"
+careers_url = "https://jobs.sanofi.com/en"
+params = { origin = "https://jobs.sanofi.com" }
+program = { label = "Careers", url = "https://jobs.sanofi.com/en", location = "Morristown, NJ" }
 
 [[companies]]
 name = "Siemens Healthineers"
@@ -289,6 +454,13 @@ params = { origin = "https://careers.stryker.com", search_terms = ["intern", "in
 program = { label = "Students and graduates", url = "https://careers.stryker.com/students-and-graduates", location = "Kalamazoo, MI" }
 
 [[companies]]
+name = "Takeda"
+platform = "talentbrew"
+careers_url = "https://jobs.takeda.com"
+params = { origin = "https://jobs.takeda.com" }
+program = { label = "Summer internship program", url = "https://jobs.takeda.com/takeda-summer-internship-program", location = "Cambridge, MA" }
+
+[[companies]]
 name = "Tandem"
 platform = "careers_page"
 careers_url = "https://www.tandemdiabetes.com/about-us/careers"
@@ -302,6 +474,30 @@ platform = "jobs2web"
 careers_url = "https://careers.teleflex.com"
 params = { origin = "https://careers.teleflex.com" }
 program = { label = "Careers", url = "https://careers.teleflex.com/", location = "Wayne, PA" }
+
+# Teva's Eightfold search API refuses automated requests (HTTP 403), so the
+# tracker reads only its early-careers page.
+[[companies]]
+name = "Teva"
+platform = "careers_page"
+careers_url = "https://www.careers.teva/careers"
+params = { page = "https://www.careers.teva/careers/early-careers" }
+program = { label = "Early careers", url = "https://www.careers.teva/careers/early-careers", location = "Parsippany, NJ" }
+
+# Vertex's site refuses automated requests (HTTP 403), also from GitHub's
+# runners on 2026-11-25, so it is link-only.
+[[companies]]
+name = "Vertex"
+platform = "link"
+careers_url = "https://www.vrtx.com/careers/"
+program = { label = "Careers", url = "https://www.vrtx.com/careers/", location = "Boston, MA" }
+
+[[companies]]
+name = "Viatris"
+platform = "careers_page"
+careers_url = "https://www.viatris.com/en/careers"
+params = { page = "https://www.viatris.com/en/careers" }
+program = { label = "Careers", url = "https://www.viatris.com/en/careers", location = "Canonsburg, PA" }
 
 [[companies]]
 name = "Zimmer Biomet"

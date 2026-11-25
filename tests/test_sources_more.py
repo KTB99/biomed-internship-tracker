@@ -1,4 +1,5 @@
-"""Readers for Oracle, Pinpoint, TalentBrew, jobs2web, Kentico, Paradox, careers pages, Algolia."""
+"""Readers for Oracle, Pinpoint, TalentBrew, jobs2web, Kentico, Paradox, careers pages, Algolia,
+Attrax and Happy Dance."""
 
 import json
 
@@ -321,3 +322,97 @@ def test_algolia_rejects_odd_app_ids():
             client,
             company(platform="algolia", app_id="evil.example/x", search_key="k", index="Jobs"),
         )
+
+
+CATEGORY_INSIDE_LINK = """
+<section id="search-results" data-total-pages="1">
+  <a href="/en/job/swiftwater/process-intern/2649/301" data-job-id="301">
+    <h2>2027 Summer Intern Process Engineering</h2>
+    <span class="job-location"><strong>Location: </strong>Swiftwater, Pennsylvania</span>
+    <span class="job-category"><strong>Category: </strong>Human Resources</span>
+  </a>
+  <a href="/en/job/boston/pk-intern/1113/302" data-job-id="302">
+    <h2 class="title">Pharmacometrics Intern</h2>
+    <span class="location">Boston, MA</span>
+  </a>
+</section>
+"""
+
+
+def test_talentbrew_takes_the_title_from_the_heading():
+    client, session = fake_client(lambda *args: FakeResponse({"results": CATEGORY_INSIDE_LINK}))
+    leads = fetch_leads(
+        client,
+        company(
+            platform="talentbrew",
+            **only(origin="https://jobs.acme.example", results_path="/search-jobs/results"),
+        ),
+    )
+    by_id = {lead.external_id: lead for lead in leads}
+    assert by_id["301"].title == "2027 Summer Intern Process Engineering"
+    assert by_id["301"].locations == ["Swiftwater, Pennsylvania"]
+    assert by_id["302"].title == "Pharmacometrics Intern"
+    assert by_id["302"].locations == ["Boston, MA"]
+    assert session.calls[0][1] == "https://jobs.acme.example/search-jobs/results"
+
+
+ATTRAX_PAGE = """
+<div class="attrax-vacancy-tile" data-jobid="36159">
+  <a class="attrax-vacancy-tile__title attrax-button"
+     href="/en/job/2027-product-development-intern-in-north-chicago-il-jid-36159">2027 Product
+     Development Intern (Undergraduate)</a>
+  <div class="attrax-vacancy-tile__salary attrax-vacancy-tile__item">
+    <p class="attrax-vacancy-tile__item-value">$40,000</p></div>
+  <div class="attrax-vacancy-tile__location-freetext attrax-vacancy-tile__item">
+    <p class="attrax-vacancy-tile__item-label">Location</p>
+    <p class="attrax-vacancy-tile__item-value">North Chicago, IL</p></div>
+</div>
+"""
+
+
+def test_attrax_reads_tiles_until_a_page_adds_nothing():
+    pages = [ATTRAX_PAGE, ATTRAX_PAGE]
+    client, session = fake_client(lambda *args: FakeResponse(body=pages.pop(0)))
+    (lead,) = fetch_leads(
+        client, company(platform="attrax", **only(origin="https://careers.acme.example"))
+    )
+    assert lead.external_id == "36159"
+    assert lead.title == "2027 Product Development Intern (Undergraduate)"
+    assert lead.locations == ["North Chicago, IL"]
+    assert lead.url == (
+        "https://careers.acme.example/en/job/2027-product-development-intern-in-north-chicago-il-jid-36159"
+    )
+    assert [call[2]["params"] for call in session.calls] == [
+        {"q": "intern"},
+        {"q": "intern", "page": "2"},
+    ]
+
+
+HAPPYDANCE_LABELLED = """
+<div id="js-job-search-results" data-results="2">
+  <article class="group card-job" data-id="r53005"><h3>
+    <a href="/en/jobs/r53005/intern-global-development-quality/">Intern, Global Development
+      Quality</a></h3>
+    <ul><li><svg></svg><span class="sr-only">Location<!-- -->:</span>Tarrytown, New York, United
+      States of America</li><li><span class="sr-only">Work Pattern:</span>Onsite</li></ul>
+  </article>
+</div>
+"""
+
+
+def test_happydance_reads_labelled_locations_and_pages():
+    client, session = fake_client(lambda *args: FakeResponse(body=HAPPYDANCE_LABELLED))
+    (lead,) = fetch_leads(
+        client, company(platform="happydance", **only(origin="https://careers.acme.example"))
+    )
+    assert lead.external_id == "r53005"
+    assert lead.title == "Intern, Global Development Quality"
+    assert lead.locations == ["Tarrytown, New York, United States of America"]
+    assert lead.url == (
+        "https://careers.acme.example/en/jobs/r53005/intern-global-development-quality/"
+    )
+    # One card of the two the site reports, then a page with nothing new.
+    assert [call[2]["params"] for call in session.calls] == [
+        {"search": "intern"},
+        {"search": "intern", "page": "2"},
+    ]

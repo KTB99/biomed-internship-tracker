@@ -12,9 +12,11 @@ from collections.abc import Callable
 
 from tracker.sources import (
     algolia,
+    attrax,
     careers_page,
     eightfold,
     greenhouse,
+    happydance,
     jobs2web,
     kentico,
     lever,
@@ -28,9 +30,11 @@ from tracker.sources import (
 
 PLATFORMS: dict[str, Callable] = {
     "algolia": algolia.fetch,
+    "attrax": attrax.fetch,
     "careers_page": careers_page.fetch,
     "eightfold": eightfold.fetch,
     "greenhouse": greenhouse.fetch,
+    "happydance": happydance.fetch,
     "jobs2web": jobs2web.fetch,
     "kentico": kentico.fetch,
     "lever": lever.fetch,

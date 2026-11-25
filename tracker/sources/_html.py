@@ -17,11 +17,12 @@ class Card:
     url: str
     job_id: str = ""
     title_parts: list[str] = field(default_factory=list)
+    heading_parts: list[str] = field(default_factory=list)
     location_parts: list[str] = field(default_factory=list)
 
     @property
     def title(self) -> str:
-        return " ".join(" ".join(self.title_parts).split())
+        return " ".join(" ".join(self.heading_parts or self.title_parts).split())
 
     @property
     def location(self) -> str:
@@ -36,16 +37,27 @@ class CardParser(HTMLParser):
     """Collects job links and their locations from search-result markup.
 
     `is_job_link` picks the <a> elements that are job titles; their text is the
-    title. `is_location` picks the element holding a job's location, which may
-    sit inside or after the link. Repeated links to the same URL (sites often
-    render desktop and mobile copies) merge into one card.
+    title. When the link also holds other text (a category, a date), `is_title`
+    picks the element inside it that holds just the title; a link without one
+    keeps its whole text. `is_location` picks the element holding a job's
+    location, which may sit inside or after the link. Repeated links to the
+    same URL (sites often render desktop and mobile copies) merge into one card.
     """
 
-    def __init__(self, base_url: str, is_job_link: Matcher, is_location: Matcher) -> None:
+    def __init__(
+        self,
+        base_url: str,
+        is_job_link: Matcher,
+        is_location: Matcher,
+        is_title: Matcher | None = None,
+    ) -> None:
         super().__init__(convert_charrefs=True)
         self.base_url = base_url
         self.is_job_link = is_job_link
         self.is_location = is_location
+        self.is_title = is_title
+        self._title_tag: str | None = None
+        self._title_depth = 0
         self.cards: dict[str, Card] = {}
         self._current: Card | None = None
         self._in_link = False
@@ -66,6 +78,14 @@ class CardParser(HTMLParser):
             self._in_link = True
             self._fresh_location = not card.location_parts
             return
+        if self._title_tag is not None:
+            if tag == self._title_tag:
+                self._title_depth += 1
+            return
+        if self._in_link and self.is_title is not None and self.is_title(tag, attributes):
+            self._title_tag = tag
+            self._title_depth = 1
+            return
         if self._location_tag is not None:
             if tag == self._location_tag:
                 self._location_depth += 1
@@ -75,6 +95,12 @@ class CardParser(HTMLParser):
             self._location_depth = 1
 
     def handle_endtag(self, tag):
+        if self._title_tag is not None:
+            if tag == self._title_tag:
+                self._title_depth -= 1
+                if self._title_depth == 0:
+                    self._title_tag = None
+            return
         if self._location_tag is not None and tag == self._location_tag:
             self._location_depth -= 1
             if self._location_depth == 0:
@@ -93,10 +119,18 @@ class CardParser(HTMLParser):
                 self._current.location_parts.append(data)
         elif self._in_link and self._fresh_title:
             self._current.title_parts.append(data)
+            if self._title_tag is not None:
+                self._current.heading_parts.append(data)
 
 
-def parse_cards(html: str, base_url: str, is_job_link: Matcher, is_location: Matcher) -> list[Card]:
-    parser = CardParser(base_url, is_job_link, is_location)
+def parse_cards(
+    html: str,
+    base_url: str,
+    is_job_link: Matcher,
+    is_location: Matcher,
+    is_title: Matcher | None = None,
+) -> list[Card]:
+    parser = CardParser(base_url, is_job_link, is_location, is_title)
     parser.feed(html)
     parser.close()
     return [card for card in parser.cards.values() if card.title]
