@@ -1,0 +1,32 @@
+name: Suggest a company
+description: Ask the tracker to follow a biomedical or medical-device company it doesn't list yet.
+title: "Suggest company: "
+labels: [needs-triage, enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The tracker follows biomedical and medical-device companies and NIH
+        research programs that hire US STEM summer interns or co-ops. A maintainer
+        checks whether the company's job board can be read and, if so, adds it.
+  - type: input
+    id: company
+    attributes:
+      label: Company
+    validations:
+      required: true
+  - type: input
+    id: careers_url
+    attributes:
+      label: Careers or internship page
+      description: The company's own page, not a job aggregator.
+      placeholder: "https://"
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Anything else
+      description: For example, which roles it usually hires interns for.
+    validations:
+      required: false

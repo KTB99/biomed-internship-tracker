@@ -18,6 +18,11 @@ Guidance for coding agents working on the Biomedical Internship Tracker.
   `companies.toml`; `tests/test_issue_form.py` keeps the two equal.
 - `tracker/submit.py`: turns that form's issue body into a submitted listing
   (`platform = "submitted"`). See `docs/adr/0002-submitted-listings.md`.
+- `.github/ISSUE_TEMPLATE/report-listing.yml` and `suggest-company.yml`: issue
+  forms for wrong listings and company suggestions. Nothing reads them
+  automatically; a maintainer triages them. Blank issues are off
+  (`config.yml`).
+- `.github/dependabot.yml`: monthly grouped updates for the workflows' actions.
 
 ## Commands
 

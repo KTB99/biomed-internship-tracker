@@ -16,6 +16,10 @@ only collects links.
   board. A missing company or role doesn't mean nothing is open. Check the
   company's careers page too.
 
+Spotted a listing that's closed or wrong? [Report it](https://github.com/KTB99/biomed-internship-tracker/issues/new?template=report-listing.yml).
+Know a company the tracker should follow?
+[Suggest it](https://github.com/KTB99/biomed-internship-tracker/issues/new?template=suggest-company.yml).
+
 Listings that close move to [CLOSED.md](CLOSED.md). The raw data is in
 [`data/listings.json`](data/listings.json).
 
