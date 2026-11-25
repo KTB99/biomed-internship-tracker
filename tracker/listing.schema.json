@@ -35,9 +35,11 @@
     "platform": {
       "enum": [
         "algolia",
+        "attrax",
         "careers_page",
         "eightfold",
         "greenhouse",
+        "happydance",
         "jobs2web",
         "kentico",
         "lever",
