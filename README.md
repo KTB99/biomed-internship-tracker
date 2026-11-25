@@ -274,8 +274,8 @@ company in [`companies.toml`](companies.toml) it:
 The run then runs the same checks as CI and, if they pass, commits the day's
 data straight to `main` as `data: daily refresh <date>`. It pushes with a
 deploy key whose private half is the repository secret `REFRESH_DEPLOY_KEY`.
-That key is the one actor allowed to skip review and required checks on `main`
-(see Development), so the workflow's own checks are what keep bad data off
+That key is the one actor allowed to skip review and CI on `main` (see
+Development), so the workflow's own checks are what keep bad data off
 `main`. It still can't force-push: if `main` moved while the refresh ran, the
 push is refused, the run fails, and the next run refreshes from the new `main`.
 A real run without the secret fails before reading anything.
@@ -333,14 +333,16 @@ When a company really has emptied its board, its reads keep failing with
 "<company>"` and open a pull request with the `data/status.json` change. It
 clears that company's last good fetch count, so the next empty read is accepted.
 
-`main` is protected by two repository rulesets:
+`main` is protected by three repository rulesets:
 
-- **Protect main history:** nobody can force-push or delete `main`, the daily
-  refresh included.
-- **Protect main:** changes come through a pull request with one approving
-  review and passing CI checks (`test (3.11)` and `test (3.13)`). Only the daily
-  refresh's deploy key skips it. The repository admin can also override it, but
-  only when merging a pull request, so wait for CI before doing so.
+- **Protect main history:** nobody can force-push or delete `main`.
+- **Require CI:** changes need passing CI checks (`test (3.11)` and
+  `test (3.13)`). Only the daily refresh's deploy key skips this; the refresh
+  runs the same checks itself before pushing.
+- **Require review:** changes come through a pull request approved by the
+  maintainer. The maintainer's own pull requests don't need approval: merge them
+  once CI passes, using GitHub's "bypass rules" merge option
+  (`gh pr merge --admin`). The deploy key skips this too.
 
 Tests mock all HTTP and never touch the network. To add a company on a supported
 platform, add an entry to `companies.toml`. To add a platform, see

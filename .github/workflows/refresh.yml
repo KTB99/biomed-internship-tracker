@@ -39,8 +39,8 @@ jobs:
           exit 1
 
       # A real run publishes with the deploy key, the only actor main's
-      # "Protect main" ruleset lets skip review and required checks. Without it
-      # the push would be refused, so fail before reading anything.
+      # rulesets let skip review and CI. Without it the push would be refused,
+      # so fail before reading anything.
       - name: Require the deploy key
         if: ${{ !inputs.dry_run }}
         env:
