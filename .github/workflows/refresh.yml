@@ -57,11 +57,11 @@ jobs:
       # "Re-run jobs" refreshes from current main instead of a stale github.sha.
       # A dry run keeps the dispatched ref, which is the branch under test, and
       # gets no deploy key since it pushes nothing.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ !inputs.dry_run && 'main' || '' }}
           ssh-key: ${{ !inputs.dry_run && secrets.REFRESH_DEPLOY_KEY || '' }}
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           cache: pip
