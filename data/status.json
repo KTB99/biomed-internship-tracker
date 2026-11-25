@@ -132,10 +132,10 @@
     },
     "Hologic": {
       "ok": true,
-      "fetched": 125,
+      "fetched": 126,
       "accepted": 0,
       "error": null,
-      "last_good_fetched": 125,
+      "last_good_fetched": 126,
       "last_good_date": "2026-11-25"
     },
     "Inspire Medical Systems": {

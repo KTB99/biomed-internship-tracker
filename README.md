@@ -186,7 +186,7 @@ Closed listings are in [CLOSED.md](CLOSED.md).
 | [Edwards](https://www.edwards.com/careers) | algolia | 0 | ok | 4 |
 | [GE HealthCare](https://careers.gehealthcare.com) | phenom | 0 | ok | 123 |
 | [Globus Medical](https://www.globusmedical.com/about/careers/) | careers\_page | 0 | ok | 0 |
-| [Hologic](https://ebwb.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX) | oracle | 0 | ok | 125 |
+| [Hologic](https://ebwb.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX) | oracle | 0 | ok | 126 |
 | [Inspire Medical Systems](https://job-boards.greenhouse.io/inspiremedicalsystemsinc) | greenhouse | 0 | ok | 74 |
 | [Insulet](https://www.insulet.com/working-at-insulet) | careers\_page | 0 | ok | 0 |
 | [Integra LifeSciences](https://www.integralife.com/careers/job-search) | kentico | 0 | ok | 1 |
