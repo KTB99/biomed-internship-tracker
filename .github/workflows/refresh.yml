@@ -6,14 +6,14 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Dry run: read every company and report, write nothing, open no pull request"
+        description: "Dry run: read every company and report, write nothing, push nothing"
         type: boolean
         default: false
 
+# A real refresh pushes with the REFRESH_DEPLOY_KEY deploy key, not this token.
+# The token only opens a pull request when REFRESH_AUTOMERGE is false.
 permissions:
-  # actions: write lets the run dispatch CI on its own pull request.
-  actions: write
-  contents: write
+  contents: read
   pull-requests: write
 
 concurrency:
@@ -33,17 +33,34 @@ jobs:
         env:
           REF: ${{ github.ref }}
         run: |
-          message="A real refresh only runs on main, not ${REF}. Nothing was refreshed and no pull request was opened. Dispatch with dry_run to test this ref."
+          message="A real refresh only runs on main, not ${REF}. Nothing was refreshed or pushed. Dispatch with dry_run to test this ref."
           echo "::error::${message}"
           echo "${message}" >> "${GITHUB_STEP_SUMMARY}"
           exit 1
 
+      # A real run publishes with the deploy key, the only actor main's
+      # "Protect main" ruleset lets skip review and required checks. Without it
+      # the push would be refused, so fail before reading anything.
+      - name: Require the deploy key
+        if: ${{ !inputs.dry_run }}
+        env:
+          HAS_KEY: ${{ secrets.REFRESH_DEPLOY_KEY != '' }}
+        run: |
+          if [ "${HAS_KEY}" != "true" ]; then
+            message="The REFRESH_DEPLOY_KEY secret is not set, so a real refresh can't push to main. See \"How it works\" in the README."
+            echo "::error::${message}"
+            echo "${message}" >> "${GITHUB_STEP_SUMMARY}"
+            exit 1
+          fi
+
       # A real run checks out main's tip rather than the triggering commit, so
       # "Re-run jobs" refreshes from current main instead of a stale github.sha.
-      # A dry run keeps the dispatched ref, which is the branch under test.
+      # A dry run keeps the dispatched ref, which is the branch under test, and
+      # gets no deploy key since it pushes nothing.
       - uses: actions/checkout@v4
         with:
           ref: ${{ !inputs.dry_run && 'main' || '' }}
+          ssh-key: ${{ !inputs.dry_run && secrets.REFRESH_DEPLOY_KEY || '' }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
@@ -93,8 +110,8 @@ jobs:
           bash .github/scripts/failed-reads.sh summary "${out}" >> "${GITHUB_STEP_SUMMARY}"
           exit "${status}"
 
-      # The same checks CI runs, so data that fails them is never pushed. CI
-      # itself also runs on the pull request below: main's ruleset requires it.
+      # The same checks CI runs. The deploy key skips main's required checks,
+      # so this step is what keeps data that fails them off main.
       - name: Check
         if: ${{ !inputs.dry_run }}
         run: |
@@ -104,7 +121,7 @@ jobs:
           python -m tracker validate
           python -m tracker render --check
 
-      - name: Open and merge pull request
+      - name: Publish
         if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -115,13 +132,28 @@ jobs:
             exit 0
           fi
           day="$(date -u +%Y-%m-%d)"
-          branch="refresh/${day}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git switch -c "${branch}"
           git add data README.md CLOSED.md
           git commit -m "data: daily refresh ${day}"
-          git push --force origin "${branch}"
+
+          if [ "${AUTOMERGE}" != "false" ]; then
+            # origin uses the deploy key, which may push to main directly. The
+            # history ruleset still refuses a force-push, so if main moved since
+            # checkout this fails and the next run refreshes from the new main.
+            if ! git push origin HEAD:main; then
+              echo "::error::main changed while the refresh ran; nothing was pushed. Run the refresh again."
+              exit 1
+            fi
+            echo "Pushed $(git rev-parse --short HEAD) to main." | tee -a "${GITHUB_STEP_SUMMARY}"
+            exit 0
+          fi
+
+          # REFRESH_AUTOMERGE=false: leave the day's data in a pull request for a
+          # maintainer to review and merge. A rerun on the same day force-pushes
+          # the branch and reuses the pull request if it is still open.
+          branch="refresh/${day}"
+          git push --force origin "HEAD:refs/heads/${branch}"
           # Reuse only an open pull request from this repository's own branch: a
           # merged or closed one from an earlier run today is ignored, and a
           # fork's branch with the same name is never picked up.
@@ -134,6 +166,8 @@ jobs:
           report="$(bash .github/scripts/failed-reads.sh report "${RUNNER_TEMP}/refresh.txt")"
           {
             echo "Automated listing refresh. Checks ran in the workflow before this PR was opened."
+            echo
+            echo "CI on this pull request waits for a maintainer to approve the run (GitHub holds runs on pull requests opened by a workflow)."
             if [ -n "${report}" ]; then
               echo
               echo "${report}"
@@ -145,38 +179,5 @@ jobs:
           else
             gh pr edit "${pr_url}" --body-file "${body}"
           fi
-          echo "Pull request: ${pr_url}" | tee -a "${GITHUB_STEP_SUMMARY}"
-
-          # Pushes and pull requests made with GITHUB_TOKEN don't start other
-          # workflows, but a workflow_dispatch does. CI is dispatched on the
-          # branch so its checks run on the pull request's head commit, which
-          # is what main's required status checks look at.
-          sha="$(git rev-parse HEAD)"
-          gh workflow run ci.yml --ref "${branch}"
-          run_id=""
-          for _ in $(seq 1 30); do
-            run_id="$(gh run list --workflow ci.yml --branch "${branch}" \
-              --event workflow_dispatch --limit 20 --json databaseId,headSha \
-              --jq "[.[] | select(.headSha == \"${sha}\")][0].databaseId // empty")"
-            [ -n "${run_id}" ] && break
-            sleep 5
-          done
-          if [ -z "${run_id}" ]; then
-            echo "::error::CI did not start on ${branch}; the pull request was not merged."
-            exit 1
-          fi
-          if ! gh run watch "${run_id}" --exit-status --interval 15 > /dev/null; then
-            echo "::error::CI failed on ${branch}; the pull request was not merged."
-            echo "CI failed: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${run_id}" \
-              | tee -a "${GITHUB_STEP_SUMMARY}"
-            exit 1
-          fi
-          echo "CI passed: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${run_id}" \
+          echo "REFRESH_AUTOMERGE is false; pull request left open for review: ${pr_url}" \
             | tee -a "${GITHUB_STEP_SUMMARY}"
-
-          if [ "${AUTOMERGE}" = "false" ]; then
-            echo "REFRESH_AUTOMERGE is false; leaving the pull request open for review." \
-              | tee -a "${GITHUB_STEP_SUMMARY}"
-          else
-            gh pr merge "${pr_url}" --squash --delete-branch
-          fi
