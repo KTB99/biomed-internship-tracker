@@ -179,7 +179,7 @@ Closed listings are in [CLOSED.md](CLOSED.md).
 | [Baxter](https://jobs.baxter.com) | talentbrew | 0 | ok | 24 |
 | [BD](https://jobs.bd.com) | talentbrew | 2 | ok | 57 |
 | [Biotronik](https://www.biotronik.com/en-us/careers) | careers\_page | 0 | ok | 0 |
-| [Boston Scientific](https://bostonscientific.eightfold.ai/careers) | eightfold | 3 | ok | 30 |
+| [Boston Scientific](https://bostonscientific.eightfold.ai/careers) | eightfold | 3 | ok | 29 |
 | [CONMED](https://careers.conmed.com) | phenom | 0 | ok | 9 |
 | [CooperCompanies](https://hcjy.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1) | oracle | 0 | ok | 116 |
 | [Dexcom](https://careers.dexcom.com) | eightfold | 0 | ok | 3 |

@@ -76,10 +76,10 @@
     },
     "Boston Scientific": {
       "ok": true,
-      "fetched": 30,
+      "fetched": 29,
       "accepted": 3,
       "error": null,
-      "last_good_fetched": 30,
+      "last_good_fetched": 29,
       "last_good_date": "2026-11-25"
     },
     "CONMED": {
