@@ -8,6 +8,7 @@ from tracker.config import Program
 from tracker.render import (
     APPLY_BUTTON,
     END_MARKER,
+    GRAD_DIVIDER,
     START_MARKER,
     age,
     anchor,
@@ -230,3 +231,35 @@ def test_rolling_listings_sort_by_when_the_tracker_first_saw_them():
     status = {"last_run": "2026-11-02", "companies": {}}
     block = listings_block([dated, old_posting], status, settings(rolling, company("Beta")))
     assert block.index("Rolling Intern") < block.index("Dated Intern")
+
+
+def test_sections_put_undergrad_first_and_grad_below_a_divider():
+    rows = [
+        record("1", title="Lab Intern", posted_on="2026-11-01"),
+        record("2", title="Grad Intern - Assays", posted_on="2026-11-01"),
+        record("3", title="Undergrad Intern - Assays", posted_on="2026-10-01"),
+        record("4", title="Graduate Intern - Chemistry", posted_on="2026-10-01"),
+    ]
+    block = listings_block(rows, {"last_run": "2026-11-02"}, settings(company("Acme")))
+    assert "[Other STEM](#other-stem) (4)" in block
+    divider = GRAD_DIVIDER.format(count=2)
+    order = [
+        block.index(text)
+        for text in ("Undergrad Intern", "Lab Intern", divider, "Grad Intern - ", "Graduate Intern")
+    ]
+    assert order == sorted(order)
+    # The grad postings get their own table under the divider.
+    assert block.count("| Company | Role | Location | Apply | Age |") == 2
+
+
+def test_section_without_grad_postings_has_no_divider():
+    block = listings_block([record("1")], {}, settings(company("Acme")))
+    assert "Graduate students" not in block
+
+
+def test_section_with_only_grad_postings_starts_at_the_divider():
+    block = listings_block(
+        [record("1", title="Grad Intern - Assays")], {}, settings(company("Acme"))
+    )
+    section = block[block.index("## Other STEM") :]
+    assert section.index(GRAD_DIVIDER.format(count=1)) < section.index("| Company |")

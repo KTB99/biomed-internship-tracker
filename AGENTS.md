@@ -9,7 +9,8 @@ Guidance for coding agents working on the Biomedical Internship Tracker.
 - `tracker/sources/`: one module per job-board platform; each exposes
   `fetch(client, company) -> list[Lead]`.
 - `tracker/screen.py`: the eligibility rules (US, internship/summer co-op, STEM,
-  target year, not PhD-only).
+  target year, not PhD-only), and `level_for`, the degree level read from a
+  title (undergrad, grad or any), which orders each README section.
 - `tracker/reconcile.py`: how a run updates, closes and reopens listings.
 - `tracker/listing.schema.json`: the record format for `data/listings.json`.
 - `tracker/render.py`: README block and `CLOSED.md`.
