@@ -11,6 +11,8 @@ on:
         default: false
 
 permissions:
+  # actions: write lets the run dispatch CI on its own pull request.
+  actions: write
   contents: write
   pull-requests: write
 
@@ -91,8 +93,8 @@ jobs:
           bash .github/scripts/failed-reads.sh summary "${out}" >> "${GITHUB_STEP_SUMMARY}"
           exit "${status}"
 
-      # Pull requests opened with GITHUB_TOKEN do not trigger other workflows,
-      # so the same checks CI runs are run here before anything is merged.
+      # The same checks CI runs, so data that fails them is never pushed. CI
+      # itself also runs on the pull request below: main's ruleset requires it.
       - name: Check
         if: ${{ !inputs.dry_run }}
         run: |
@@ -144,6 +146,34 @@ jobs:
             gh pr edit "${pr_url}" --body-file "${body}"
           fi
           echo "Pull request: ${pr_url}" | tee -a "${GITHUB_STEP_SUMMARY}"
+
+          # Pushes and pull requests made with GITHUB_TOKEN don't start other
+          # workflows, but a workflow_dispatch does. CI is dispatched on the
+          # branch so its checks run on the pull request's head commit, which
+          # is what main's required status checks look at.
+          sha="$(git rev-parse HEAD)"
+          gh workflow run ci.yml --ref "${branch}"
+          run_id=""
+          for _ in $(seq 1 30); do
+            run_id="$(gh run list --workflow ci.yml --branch "${branch}" \
+              --event workflow_dispatch --limit 20 --json databaseId,headSha \
+              --jq "[.[] | select(.headSha == \"${sha}\")][0].databaseId // empty")"
+            [ -n "${run_id}" ] && break
+            sleep 5
+          done
+          if [ -z "${run_id}" ]; then
+            echo "::error::CI did not start on ${branch}; the pull request was not merged."
+            exit 1
+          fi
+          if ! gh run watch "${run_id}" --exit-status --interval 15 > /dev/null; then
+            echo "::error::CI failed on ${branch}; the pull request was not merged."
+            echo "CI failed: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${run_id}" \
+              | tee -a "${GITHUB_STEP_SUMMARY}"
+            exit 1
+          fi
+          echo "CI passed: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${run_id}" \
+            | tee -a "${GITHUB_STEP_SUMMARY}"
+
           if [ "${AUTOMERGE}" = "false" ]; then
             echo "REFRESH_AUTOMERGE is false; leaving the pull request open for review." \
               | tee -a "${GITHUB_STEP_SUMMARY}"
