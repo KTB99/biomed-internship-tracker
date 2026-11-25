@@ -107,6 +107,19 @@ _OTHER_DEGREE_WORDS = re.compile(r"bachelor|master|undergrad", re.IGNORECASE)
 _OTHER_DEGREE_CODES = re.compile(r"\b(?:B\.?S|M\.?S|B\.?A|M\.?Eng)\b")
 _SENTENCE_BREAK = re.compile(r"(?<=[.;!?])\s+|\n+")
 
+# Degree level, read from the title only: descriptions list "BS, MS or PhD" too
+# often to say who a posting is for.
+UNDERGRAD, GRAD, ANY_LEVEL = "undergrad", "grad", "any"
+_UNDERGRAD_LEVEL = re.compile(
+    r"\bunder-?grad(?:uate)?s?\b|\bbachelor|\bcommunity college\b", re.IGNORECASE
+)
+_UNDERGRAD_CODES = re.compile(r"\bB\.?S\b")
+_GRAD_LEVEL = re.compile(
+    r"\bgrad(?:uate)?s?\b|\bmaster(?:['’]?s\b| of\b)|\bmba\b|\bph\.?\s?d\b|doctoral",
+    re.IGNORECASE,
+)
+_GRAD_CODES = re.compile(r"\bM\.?S\b|\bM\.?Eng\b")
+
 
 @dataclass(frozen=True)
 class Verdict:
@@ -136,6 +149,18 @@ def family_for(lead: Lead) -> str:
             if pattern.search(text) or (name == SOFTWARE_FAMILY and _IT.search(text)):
                 return name
     return OTHER_FAMILY
+
+
+def level_for(title: str) -> str:
+    """Who a posting's title says it is for: undergrad, grad, or any when it
+    names neither or both ("BS/MS Intern")."""
+    undergrad = bool(_UNDERGRAD_LEVEL.search(title) or _UNDERGRAD_CODES.search(title))
+    # "Under-graduate" would otherwise also read as "graduate".
+    rest = _UNDERGRAD_LEVEL.sub(" ", title)
+    grad = bool(_GRAD_LEVEL.search(rest) or _GRAD_CODES.search(rest))
+    if undergrad == grad:
+        return ANY_LEVEL
+    return UNDERGRAD if undergrad else GRAD
 
 
 def _placement_problem(lead: Lead) -> str | None:

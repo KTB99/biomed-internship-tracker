@@ -13,13 +13,17 @@ from urllib.parse import quote, urlsplit
 
 from tracker.config import Settings
 from tracker.places import tidy_location
-from tracker.screen import FAMILIES
+from tracker.screen import FAMILIES, GRAD, UNDERGRAD, level_for
 
 START_MARKER = "<!-- listings:start -->"
 END_MARKER = "<!-- listings:end -->"
 CLOSED_LIMIT = 500
 APPLY_BUTTON = "assets/apply-button.svg"
 PROGRAMS_HEADING = "Company program pages"
+# Separates a section's graduate-level postings, listed last, from the rest.
+GRAD_DIVIDER = (
+    '<p align="center"><sub>┄┄┄┄┄┄┄┄┄┄ <b>Graduate students</b> ({count}) ┄┄┄┄┄┄┄┄┄┄</sub></p>'
+)
 
 # README section order and headings, keyed by the stored `family` value.
 SECTIONS: tuple[tuple[str, str], ...] = (
@@ -116,24 +120,41 @@ def listings_block(listings: list[dict], status: dict, settings: Settings) -> st
     if jumps:
         lines += ["## Browse by role", "", " · ".join(jumps), ""]
     for heading, rows in sections:
-        lines += [
-            f"## {heading}",
-            "",
-            "| Company | Role | Location | Apply | Age |",
-            "| --- | --- | --- | :---: | ---: |",
-        ]
-        lines += [
-            f"| {cell(row['company'])} | {role_cell(row['title'], notes.get(row['company']))} | "
-            f"{location_cell(row['location'])} | {apply_button(row['url'])} | "
-            f"{_age_cell(row, rolling, today)} |"
-            for row in rows
-        ]
-        lines.append("")
+        levels = {row["id"]: level_for(row["title"]) for row in rows}
+        # Undergraduate postings first, then those open to any level (sorts are stable).
+        main = sorted(
+            (row for row in rows if levels[row["id"]] != GRAD),
+            key=lambda row: levels[row["id"]] != UNDERGRAD,
+        )
+        grad = [row for row in rows if levels[row["id"]] == GRAD]
+        lines += [f"## {heading}", ""]
+        if main:
+            lines += _listing_table(main, notes, rolling, today)
+        if grad:
+            lines += [GRAD_DIVIDER.format(count=len(grad)), ""]
+            lines += _listing_table(grad, notes, rolling, today)
     lines += _program_section(programs)
     lines += _stats_table(listings, status, settings)
     lines += _company_table(listings, status, settings)
     lines.append(END_MARKER)
     return "\n".join(lines)
+
+
+def _listing_table(
+    rows: list[dict], notes: dict[str, str | None], rolling: set[str], today: str | None
+) -> list[str]:
+    lines = [
+        "| Company | Role | Location | Apply | Age |",
+        "| --- | --- | --- | :---: | ---: |",
+    ]
+    lines += [
+        f"| {cell(row['company'])} | {role_cell(row['title'], notes.get(row['company']))} | "
+        f"{location_cell(row['location'])} | {apply_button(row['url'])} | "
+        f"{_age_cell(row, rolling, today)} |"
+        for row in rows
+    ]
+    lines.append("")
+    return lines
 
 
 def role_cell(title: str, note: str | None) -> str:

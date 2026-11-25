@@ -2,7 +2,7 @@ import pytest
 
 from tracker.models import Lead
 from tracker.places import is_us_location
-from tracker.screen import FAMILIES, family_for, screen
+from tracker.screen import FAMILIES, family_for, level_for, screen
 
 
 def lead(title, *, locations=("Irvine, CA",), **fields) -> Lead:
@@ -173,3 +173,30 @@ def test_phd_alongside_other_degrees_is_accepted():
 def test_family(title, family):
     assert family in FAMILIES
     assert family_for(lead(title)) == family
+
+
+@pytest.mark.parametrize(
+    "title, level",
+    [
+        ("Undergrad Intern – Clinical Immunology (Summer 2027)", "undergrad"),
+        ("Discovery Chemistry Undergraduate Internship", "undergrad"),
+        ("Global Engineering Capital Projects Intern, Undergraduate", "undergrad"),
+        ("Under-graduate Research Intern", "undergrad"),
+        ("Summer 2027 - Genentech Community College Internship Program - Laboratory", "undergrad"),
+        ("Bachelor's Engineering Intern", "undergrad"),
+        ("BS Chemistry Intern", "undergrad"),
+        ("Grad Intern – Protein Engineering (Summer 2027)", "grad"),
+        ("Graduate Intern – R&D Execution, Operations & Strategy", "grad"),
+        ("Master's Data Science Intern", "grad"),
+        ("Masters Intern, Biostatistics", "grad"),
+        ("MS/PhD Research Intern", "grad"),
+        ("MBA Intern - Strategy", "grad"),
+        ("Undergraduate or Graduate Research Intern", "any"),
+        ("BS/MS Quality Engineering Intern", "any"),
+        ("Master Data Management Intern", "any"),
+        ("Research Intern - Graduating seniors welcome", "any"),
+        ("Software Engineering Intern", "any"),
+    ],
+)
+def test_level(title, level):
+    assert level_for(title) == level
