@@ -1,14 +1,14 @@
 {
-  "last_run": "2026-11-24",
+  "last_run": "2026-11-25",
   "season": "summer-2027",
   "companies": {
     "Abbott": {
       "ok": true,
-      "fetched": 927,
+      "fetched": 925,
       "accepted": 4,
       "error": null,
-      "last_good_fetched": 927,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 925,
+      "last_good_date": "2026-11-25"
     },
     "Alcon": {
       "ok": true,
@@ -20,51 +20,51 @@
     },
     "Align": {
       "ok": true,
-      "fetched": 198,
+      "fetched": 228,
       "accepted": 0,
       "error": null,
-      "last_good_fetched": 198,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 228,
+      "last_good_date": "2026-11-25"
     },
     "Arthrex": {
       "ok": true,
-      "fetched": 186,
+      "fetched": 184,
       "accepted": 1,
       "error": null,
-      "last_good_fetched": 186,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 184,
+      "last_good_date": "2026-11-25"
     },
     "AtriCure": {
-      "ok": true,
-      "fetched": 57,
-      "accepted": 2,
-      "error": null,
-      "last_good_fetched": 57,
-      "last_good_date": "2026-11-24"
-    },
-    "Axogen": {
-      "ok": true,
-      "fetched": 53,
-      "accepted": 1,
-      "error": null,
-      "last_good_fetched": 53,
-      "last_good_date": "2026-11-24"
-    },
-    "Baxter": {
-      "ok": true,
-      "fetched": 25,
-      "accepted": 0,
-      "error": null,
-      "last_good_fetched": 25,
-      "last_good_date": "2026-11-24"
-    },
-    "BD": {
       "ok": true,
       "fetched": 56,
       "accepted": 2,
       "error": null,
       "last_good_fetched": 56,
-      "last_good_date": "2026-11-24"
+      "last_good_date": "2026-11-25"
+    },
+    "Axogen": {
+      "ok": true,
+      "fetched": 55,
+      "accepted": 1,
+      "error": null,
+      "last_good_fetched": 55,
+      "last_good_date": "2026-11-25"
+    },
+    "Baxter": {
+      "ok": true,
+      "fetched": 24,
+      "accepted": 0,
+      "error": null,
+      "last_good_fetched": 24,
+      "last_good_date": "2026-11-25"
+    },
+    "BD": {
+      "ok": true,
+      "fetched": 57,
+      "accepted": 2,
+      "error": null,
+      "last_good_fetched": 57,
+      "last_good_date": "2026-11-25"
     },
     "Biotronik": {
       "ok": true,
@@ -77,10 +77,10 @@
     "Boston Scientific": {
       "ok": true,
       "fetched": 30,
-      "accepted": 2,
+      "accepted": 3,
       "error": null,
       "last_good_fetched": 30,
-      "last_good_date": "2026-11-24"
+      "last_good_date": "2026-11-25"
     },
     "CONMED": {
       "ok": true,
@@ -88,23 +88,23 @@
       "accepted": 0,
       "error": null,
       "last_good_fetched": 9,
-      "last_good_date": "2026-11-24"
+      "last_good_date": "2026-11-25"
     },
     "CooperCompanies": {
       "ok": true,
-      "fetched": 117,
+      "fetched": 116,
       "accepted": 0,
       "error": null,
-      "last_good_fetched": 117,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 116,
+      "last_good_date": "2026-11-25"
     },
     "Dexcom": {
       "ok": true,
-      "fetched": 4,
+      "fetched": 3,
       "accepted": 0,
       "error": null,
-      "last_good_fetched": 4,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 3,
+      "last_good_date": "2026-11-25"
     },
     "Edwards": {
       "ok": true,
@@ -112,15 +112,15 @@
       "accepted": 0,
       "error": null,
       "last_good_fetched": 4,
-      "last_good_date": "2026-11-24"
+      "last_good_date": "2026-11-25"
     },
     "GE HealthCare": {
       "ok": true,
-      "fetched": 116,
+      "fetched": 123,
       "accepted": 0,
       "error": null,
-      "last_good_fetched": 116,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 123,
+      "last_good_date": "2026-11-25"
     },
     "Globus Medical": {
       "ok": true,
@@ -132,11 +132,11 @@
     },
     "Hologic": {
       "ok": true,
-      "fetched": 121,
+      "fetched": 125,
       "accepted": 0,
       "error": null,
-      "last_good_fetched": 121,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 125,
+      "last_good_date": "2026-11-25"
     },
     "Inspire Medical Systems": {
       "ok": true,
@@ -144,7 +144,7 @@
       "accepted": 0,
       "error": null,
       "last_good_fetched": 74,
-      "last_good_date": "2026-11-24"
+      "last_good_date": "2026-11-25"
     },
     "Insulet": {
       "ok": true,
@@ -160,15 +160,15 @@
       "accepted": 0,
       "error": null,
       "last_good_fetched": 1,
-      "last_good_date": "2026-11-24"
+      "last_good_date": "2026-11-25"
     },
     "Intuitive": {
       "ok": true,
-      "fetched": 318,
-      "accepted": 10,
+      "fetched": 316,
+      "accepted": 9,
       "error": null,
-      "last_good_fetched": 318,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 316,
+      "last_good_date": "2026-11-25"
     },
     "J&J MedTech": {
       "ok": true,
@@ -189,10 +189,10 @@
     "Neuralink": {
       "ok": true,
       "fetched": 78,
-      "accepted": 17,
+      "accepted": 18,
       "error": null,
       "last_good_fetched": 78,
-      "last_good_date": "2026-11-24"
+      "last_good_date": "2026-11-25"
     },
     "NIH": {
       "ok": true,
@@ -212,27 +212,27 @@
     },
     "Olympus": {
       "ok": true,
-      "fetched": 70,
+      "fetched": 69,
       "accepted": 0,
       "error": null,
-      "last_good_fetched": 70,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 69,
+      "last_good_date": "2026-11-25"
     },
     "Penumbra": {
       "ok": true,
-      "fetched": 73,
+      "fetched": 74,
       "accepted": 0,
       "error": null,
-      "last_good_fetched": 73,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 74,
+      "last_good_date": "2026-11-25"
     },
     "Philips": {
       "ok": true,
-      "fetched": 72,
+      "fetched": 75,
       "accepted": 3,
       "error": null,
-      "last_good_fetched": 72,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 75,
+      "last_good_date": "2026-11-25"
     },
     "ResMed": {
       "ok": true,
@@ -244,11 +244,11 @@
     },
     "Siemens Healthineers": {
       "ok": true,
-      "fetched": 132,
+      "fetched": 128,
       "accepted": 3,
       "error": null,
-      "last_good_fetched": 132,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 128,
+      "last_good_date": "2026-11-25"
     },
     "Smith+Nephew": {
       "ok": true,
@@ -260,19 +260,19 @@
     },
     "STERIS": {
       "ok": true,
-      "fetched": 23,
+      "fetched": 25,
       "accepted": 5,
       "error": null,
-      "last_good_fetched": 23,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 25,
+      "last_good_date": "2026-11-25"
     },
     "Stryker": {
       "ok": true,
-      "fetched": 20,
-      "accepted": 4,
+      "fetched": 22,
+      "accepted": 0,
       "error": null,
-      "last_good_fetched": 20,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 22,
+      "last_good_date": "2026-11-25"
     },
     "Tandem": {
       "ok": true,
@@ -284,19 +284,19 @@
     },
     "Teleflex": {
       "ok": true,
-      "fetched": 90,
+      "fetched": 88,
       "accepted": 1,
       "error": null,
-      "last_good_fetched": 90,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 88,
+      "last_good_date": "2026-11-25"
     },
     "Zimmer Biomet": {
       "ok": true,
-      "fetched": 29,
+      "fetched": 28,
       "accepted": 0,
       "error": null,
-      "last_good_fetched": 29,
-      "last_good_date": "2026-11-24"
+      "last_good_fetched": 28,
+      "last_good_date": "2026-11-25"
     }
   }
 }
