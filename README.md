@@ -271,19 +271,29 @@ company in [`companies.toml`](companies.toml) it:
    [`tracker/listing.schema.json`](tracker/listing.schema.json) and regenerates
    this README and `CLOSED.md`.
 
-The run then runs the same checks as CI, commits to a `refresh/<date>` branch
-and opens a pull request. It dispatches CI on that branch, since pull requests
-opened by a workflow don't start CI themselves, and squash-merges the pull
-request once CI passes. If CI fails, the pull request stays open and the run
-fails. A rerun on the same day force-pushes
-that branch and reuses the day's pull request if it is still open, or opens a
-new one otherwise. Set the repository variable `REFRESH_AUTOMERGE` to `false` to
-leave the pull request open for review instead of merging it.
+The run then runs the same checks as CI and, if they pass, commits the day's
+data straight to `main` as `data: daily refresh <date>`. It pushes with a
+deploy key whose private half is the repository secret `REFRESH_DEPLOY_KEY`.
+That key is the one actor allowed to skip review and CI on `main` (see
+Development), so the workflow's own checks are what keep bad data off
+`main`. It still can't force-push: if `main` moved while the refresh ran, the
+push is refused, the run fails, and the next run refreshes from the new `main`.
+A real run without the secret fails before reading anything.
+
+Set the repository variable `REFRESH_AUTOMERGE` to `false` to review each
+refresh instead: the run pushes a `refresh/<date>` branch and opens a pull
+request, and a maintainer approves its CI run, which GitHub holds because a
+workflow opened the pull request, then reviews and merges it. A rerun on the
+same day force-pushes that branch and reuses the day's pull request if it is
+still open, or opens a new one otherwise.
+
+To replace the deploy key, add a new write-access deploy key, store its private
+key in `REFRESH_DEPLOY_KEY`, then delete the old deploy key.
 
 Every run, scheduled or dispatched, lists the companies whose read failed
 (their `[failed]` lines) in the job summary and adds a warning annotation for
-each one, whether or not a pull request is opened. A refresh pull request lists
-the same failed reads in its body. If every company fails, the run writes
+each one, whether or not anything is pushed. A refresh pull request lists the
+same failed reads in its body. If every company fails, the run writes
 nothing and the job fails. The reporting is done by
 [`.github/scripts/failed-reads.sh`](.github/scripts/failed-reads.sh).
 
@@ -298,7 +308,7 @@ refresh** → **Run workflow**):
 - Without it, the run is a real refresh, the same as the scheduled one. A real
   refresh only runs on `main`: dispatched on any other branch it fails at its
   first step, before reading anything, so data built from unmerged code never
-  reaches a pull request.
+  reaches `main`.
 
 ## Development
 
@@ -323,9 +333,16 @@ When a company really has emptied its board, its reads keep failing with
 "<company>"` and open a pull request with the `data/status.json` change. It
 clears that company's last good fetch count, so the next empty read is accepted.
 
-`main` takes changes only through a pull request whose CI checks
-(`test (3.11)` and `test (3.13)`) pass, and can't be force-pushed or deleted.
-The daily refresh follows the same rules.
+`main` is protected by three repository rulesets:
+
+- **Protect main history:** nobody can force-push or delete `main`.
+- **Require CI:** changes need passing CI checks (`test (3.11)` and
+  `test (3.13)`). Only the daily refresh's deploy key skips this; the refresh
+  runs the same checks itself before pushing.
+- **Require review:** changes come through a pull request approved by the
+  maintainer. The maintainer's own pull requests don't need approval: merge them
+  once CI passes, using GitHub's "bypass rules" merge option
+  (`gh pr merge --admin`). The deploy key skips this too.
 
 Tests mock all HTTP and never touch the network. To add a company on a supported
 platform, add an entry to `companies.toml`. To add a platform, see
