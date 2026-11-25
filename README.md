@@ -271,8 +271,11 @@ company in [`companies.toml`](companies.toml) it:
    [`tracker/listing.schema.json`](tracker/listing.schema.json) and regenerates
    this README and `CLOSED.md`.
 
-The run then runs the same checks as CI, commits to a `refresh/<date>` branch,
-opens a pull request and squash-merges it. A rerun on the same day force-pushes
+The run then runs the same checks as CI, commits to a `refresh/<date>` branch
+and opens a pull request. It dispatches CI on that branch, since pull requests
+opened by a workflow don't start CI themselves, and squash-merges the pull
+request once CI passes. If CI fails, the pull request stays open and the run
+fails. A rerun on the same day force-pushes
 that branch and reuses the day's pull request if it is still open, or opens a
 new one otherwise. Set the repository variable `REFRESH_AUTOMERGE` to `false` to
 leave the pull request open for review instead of merging it.
@@ -319,6 +322,10 @@ When a company really has emptied its board, its reads keep failing with
 "returned no postings after N last time". Run `python -m tracker reset-baseline
 "<company>"` and open a pull request with the `data/status.json` change. It
 clears that company's last good fetch count, so the next empty read is accepted.
+
+`main` takes changes only through a pull request whose CI checks
+(`test (3.11)` and `test (3.13)`) pass, and can't be force-pushed or deleted.
+The daily refresh follows the same rules.
 
 Tests mock all HTTP and never touch the network. To add a company on a supported
 platform, add an entry to `companies.toml`. To add a platform, see
