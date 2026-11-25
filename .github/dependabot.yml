@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # The workflows pin actions by major version (actions/checkout@v4). Python
+  # dependencies set only minimum versions, so Dependabot's security alerts
+  # cover them and they need no version updates.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"

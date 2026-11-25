@@ -1,0 +1,3 @@
+# New issues go through a form: Add internship, Report a listing problem or
+# Suggest a company. Maintainers can still open other issues with `gh issue create`.
+blank_issues_enabled: false
